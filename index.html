@@ -87,7 +87,6 @@
             transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.98);
             cursor: pointer;
-            will-change: transform, width, height;
         }
         #di-pill.expanded {
             min-height: 44px;
@@ -142,7 +141,6 @@
             height: 18px;
             border-radius: 99px;
             transform: scaleY(0.28);
-            will-change: transform;
             transition: transform 0.08s linear;
         }
         #di-pill.listening .di-bar { background: linear-gradient(180deg, #fda4af, #f43f5e); }
@@ -152,7 +150,6 @@
             font-size: 13px;
             font-weight: 500;
             color: #ffffff;
-            letter-spacing: -0.01em;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -194,7 +191,6 @@
             font-weight: 500;
             cursor: pointer;
         }
-        .di-drawer-item:active { transform: scale(0.94); }
 
         /* Üst Kontroller */
         header {
@@ -234,9 +230,8 @@
             color: #e4e4e7;
             cursor: pointer;
         }
-        .icon-btn:active, .title-badge:active { transform: scale(0.94); }
 
-        /* Merkez Sahne & Sıvı Işıklı Derin Cam Küre */
+        /* Merkez Sahne & Küre */
         main {
             flex: 1;
             display: flex;
@@ -275,7 +270,6 @@
             filter: blur(22px);
             animation: breatheHalo 5s ease-in-out infinite;
             pointer-events: none;
-            transition: background 0.6s ease, transform 0.6s ease;
         }
         .orb-ring-1 {
             position: absolute;
@@ -301,8 +295,6 @@
             width: 74%;
             height: 74%;
             border-radius: 50%;
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
-            isolation: isolate;
             background: radial-gradient(circle at 30% 25%, #1e2238 0%, #0b0d17 65%, #040508 100%);
             box-shadow:
                 inset 0 2px 14px rgba(255, 255, 255, 0.28),
@@ -311,19 +303,6 @@
                 0 0 32px rgba(99, 102, 241, 0.35);
             overflow: hidden;
             animation: floatOrb 5.5s ease-in-out infinite;
-            transition: box-shadow 0.5s ease, transform 0.4s ease;
-        }
-        .orb-core::after {
-            content: "";
-            position: absolute;
-            top: 8%;
-            left: 16%;
-            width: 44%;
-            height: 22%;
-            border-radius: 50%;
-            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.42) 0%, transparent 75%);
-            transform: rotate(-22deg);
-            pointer-events: none;
         }
         .orb-plasma {
             position: absolute;
@@ -336,42 +315,6 @@
             filter: blur(14px);
             opacity: 0.9;
             animation: liquidMorph 8s ease-in-out infinite alternate, spinSlow 14s linear infinite;
-            transition: background 0.5s ease;
-        }
-        .orb-wrapper.listening .orb-halo {
-            background: radial-gradient(circle, rgba(244, 63, 94, 0.5) 0%, rgba(232, 121, 249, 0.22) 52%, transparent 75%);
-            transform: scale(1.15);
-        }
-        .orb-wrapper.listening .orb-core {
-            box-shadow:
-                inset 0 2px 14px rgba(255, 255, 255, 0.35),
-                inset 0 -14px 28px rgba(225, 29, 72, 0.75),
-                0 0 38px rgba(244, 63, 94, 0.55);
-            transform: scale(1.06);
-        }
-        .orb-wrapper.listening .orb-plasma {
-            background:
-                radial-gradient(circle at 30% 35%, rgba(251, 113, 133, 0.9), transparent 55%),
-                radial-gradient(circle at 70% 65%, rgba(232, 121, 249, 0.85), transparent 55%),
-                radial-gradient(circle at 50% 80%, rgba(225, 29, 72, 0.9), transparent 60%);
-        }
-        .orb-wrapper.thinking .orb-plasma,
-        .orb-wrapper.thinking .orb-ring-1 { animation-duration: 2.2s; }
-        .orb-wrapper.speaking .orb-halo {
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.48) 0%, rgba(56, 189, 248, 0.22) 52%, transparent 75%);
-        }
-        .orb-wrapper.speaking .orb-core {
-            box-shadow:
-                inset 0 2px 14px rgba(255, 255, 255, 0.35),
-                inset 0 -14px 28px rgba(5, 150, 105, 0.75),
-                0 0 38px rgba(16, 185, 129, 0.5);
-            animation: speakPulse 0.8s ease-in-out infinite;
-        }
-        .orb-wrapper.speaking .orb-plasma {
-            background:
-                radial-gradient(circle at 30% 35%, rgba(52, 211, 153, 0.9), transparent 55%),
-                radial-gradient(circle at 70% 65%, rgba(56, 189, 248, 0.85), transparent 55%),
-                radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.9), transparent 60%);
         }
         .orb-hint {
             margin-top: 18px;
@@ -461,7 +404,6 @@
             white-space: nowrap;
             cursor: pointer;
         }
-        .chip-btn:active { transform: scale(0.95); }
         .chip-danger { color: #fda4af; border-color: rgba(244, 63, 94, 0.3); }
 
         .input-bar {
@@ -491,9 +433,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform 0.15s;
         }
-        .action-btn:active { transform: scale(0.93); }
         .btn-mic { background: rgba(255, 255, 255, 0.07); color: #e4e4e7; }
         .btn-send { background: var(--accent); color: #ffffff; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
 
@@ -549,7 +489,6 @@
             color: #ffffff;
             outline: none;
         }
-        .form-control:focus { border-color: var(--accent); }
         .primary-btn {
             width: 100%;
             background: var(--accent);
@@ -582,7 +521,6 @@
         }
         .toggle-row input { width: 18px; height: 18px; accent-color: var(--accent); }
 
-        /* Toast */
         #toast-box {
             position: fixed;
             top: calc(max(env(safe-area-inset-top), 12px) + 56px);
@@ -618,10 +556,6 @@
             from { transform: rotate(360deg); }
             to { transform: rotate(0deg); }
         }
-        @keyframes speakPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.07); }
-        }
         @keyframes liquidMorph {
             0% { border-radius: 42% 58% 63% 37% / 45% 42% 58% 55%; transform: scale(0.96); }
             50% { border-radius: 58% 42% 38% 62% / 55% 60% 40% 45%; transform: scale(1.06); }
@@ -631,7 +565,6 @@
 </head>
 <body>
 
-    <!-- Bildirim Toast -->
     <div id="toast-box">
         <div id="toast-text" class="glass-strong"></div>
     </div>
@@ -653,7 +586,6 @@
                 </button>
             </div>
 
-            <!-- Dinamik Ada Hızlı Komut Çekmecesi -->
             <div id="di-drawer" class="di-drawer hidden">
                 <button onclick="toggleDynamicDrawer(); toggleVoiceListening();" class="di-drawer-item">
                     <span>🎙️</span><span>Dinle</span>
@@ -680,7 +612,7 @@
         </button>
 
         <div style="display:flex; gap:8px;">
-            <button onclick="openReminderModal()" aria-label="Hatırlatıcılar" class="glass icon-btn" title="Hatırlatıcılar">
+            <button onclick="openReminderModal()" aria-label="Hatırlatıcılar" class="glass icon-btn">
                 <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </button>
             <button onclick="openVisionModal()" aria-label="AI Lens" class="glass icon-btn">
@@ -692,7 +624,7 @@
         </div>
     </header>
 
-    <!-- Merkez Sahne: Sıvı Işıklı Derin Cam Küre + Kalıcı Sohbet -->
+    <!-- Merkez Sahne -->
     <main>
         <div id="orb-stage" class="orb-stage">
             <div id="ai-orb" onclick="unlockAudioContext(); toggleVoiceListening();" class="orb-wrapper">
@@ -717,7 +649,6 @@
             <button onclick="openStudioModal()" class="glass chip-btn">✨ Görsel Oluştur</button>
             <button onclick="openVisionModal()" class="glass chip-btn">👁️ Kameraya Bak</button>
             <button onclick="openReminderModal()" class="glass chip-btn">⏰ Hatırlatıcı</button>
-            <button onclick="openShakeModal()" class="glass chip-btn">⚡ Kendini Kodla</button>
             <button onclick="clearChat()" id="clear-btn" class="hidden glass chip-btn chip-danger">Sohbeti Temizle</button>
         </div>
 
@@ -732,7 +663,7 @@
         </div>
     </footer>
 
-    <!-- 1. Hitap / Unvan Modalı -->
+    <!-- Modallar -->
     <div id="title-modal" class="modal-backdrop hidden">
         <div class="glass-strong modal-card">
             <h3 style="font-size:16px; font-weight:700;">Sana Nasıl Hitap Edeyim?</h3>
@@ -744,7 +675,6 @@
         </div>
     </div>
 
-    <!-- 2. Komuta Kontrol Merkezi -->
     <div id="settings-modal" class="modal-backdrop bottom-sheet hidden">
         <div class="glass-strong modal-card">
             <div class="flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
@@ -755,54 +685,6 @@
             <div>
                 <label class="form-label" style="color:#34d399;">Gemini / Vertex AI Anahtarı</label>
                 <input type="password" id="setting-api-key" placeholder="AQ.Ab8R... veya AIzaSy... anahtarını gir" class="form-control">
-                <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Vertex AI anahtarlarını otomatik yönlendirici köprü ile çalıştırır.</p>
-            </div>
-
-            <div class="grid-2">
-                <div>
-                    <label class="form-label">Kişilik Modu</label>
-                    <select id="setting-persona" class="form-control">
-                        <option value="samimi">Samimi & Yakın Dost</option>
-                        <option value="jarvis">J.A.R.V.I.S. (Sistem)</option>
-                        <option value="ceo">Yönetici Asistanı</option>
-                        <option value="esprili">Esprili & Enerjik</option>
-                        <option value="bilge">Bilge Mentor</option>
-                        <option value="stratejist">Strateji Uzmanı</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="form-label">Yanıt Uzunluğu</label>
-                    <select id="setting-length" class="form-control">
-                        <option value="balanced">Dengeli & Doğal</option>
-                        <option value="short">Kısa & Öz</option>
-                        <option value="detailed">Detaylı Analiz</option>
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label class="form-label">Gemini AI Ses Stüdyosu (14 Ses Tonu)</label>
-                <select id="setting-voice" class="form-control" style="margin-bottom:8px;">
-                    <optgroup label="Kadın Sesleri (7 Ton)">
-                        <option value="Aoede">Aoede — Sıcak & Doğal</option>
-                        <option value="Kore">Kore — Tok & Güven Veren</option>
-                        <option value="Zephyr">Zephyr — Enerjik & Genç</option>
-                        <option value="Leda">Leda — Yumuşak & Zarif</option>
-                        <option value="Despina">Despina — Pürüzsüz & Akıcı</option>
-                        <option value="Sulafat">Sulafat — Samimi & İçten</option>
-                        <option value="Achernar">Achernar — Sakin & Dinlendirici</option>
-                    </optgroup>
-                    <optgroup label="Erkek Sesleri (7 Ton)">
-                        <option value="Puck">Puck — Enerjik & Neşeli</option>
-                        <option value="Charon">Charon — Dengeli & Karizmatik</option>
-                        <option value="Fenrir">Fenrir — Coşkulu & Güçlü</option>
-                        <option value="Orus">Orus — Net & Otoriter</option>
-                        <option value="Algenib">Algenib — Kalın & Davudi</option>
-                        <option value="Iapetus">Iapetus — Profesyonel</option>
-                        <option value="Gacrux">Gacrux — Olgun & Derin</option>
-                    </optgroup>
-                </select>
-                <button onclick="unlockAudioContext(); testSelectedVoice();" class="secondary-btn" style="width:100%;">🔊 Seçili Sesi Canlı Dinle</button>
             </div>
 
             <div class="glass" style="padding:12px 14px; border-radius:18px; display:flex; flex-direction:column; gap:10px;">
@@ -810,33 +692,27 @@
                     <span>Yazarken Sesli Cevap Ver</span>
                     <input type="checkbox" id="setting-typing-speech">
                 </label>
-                <label class="toggle-row">
-                    <span>Telefonu Sallayınca Evrim Motorunu Aç</span>
-                    <input type="checkbox" id="setting-shake" checked>
-                </label>
             </div>
 
             <button onclick="saveSettings()" class="primary-btn">Ayarları Kaydet</button>
         </div>
     </div>
 
-    <!-- 3. Hatırlatıcı Yöneticisi Modalı -->
     <div id="reminder-modal" class="modal-backdrop hidden">
         <div class="glass-strong modal-card">
             <div class="flex items-center justify-between">
-                <h3 style="font-size:16px; font-weight:700;">⏰ Akıllı Hatırlatıcılar</h3>
+                <h3 style="font-size:16px; font-weight:700;">⏰ Hatırlatıcılar</h3>
                 <button onclick="closeModal('reminder-modal')" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
             </div>
-            <input type="text" id="reminder-text-input" placeholder="Neyi hatırlatayım? (Örn: Toplantıya katıl)" class="form-control">
+            <input type="text" id="reminder-text-input" placeholder="Neyi hatırlatayım?" class="form-control">
             <div class="grid-2">
-                <input type="number" id="reminder-mins-input" min="1" max="1440" value="5" placeholder="Dakika" class="form-control">
+                <input type="number" id="reminder-mins-input" min="1" max="1440" value="5" class="form-control">
                 <button onclick="unlockAudioContext(); addNewReminder();" class="primary-btn" style="padding:12px;">+ Ekle (Dk)</button>
             </div>
             <div id="reminder-list" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
         </div>
     </div>
 
-    <!-- 4. Canlı AI Lens (Kamera) Modalı -->
     <div id="vision-modal" class="modal-backdrop hidden">
         <div class="glass-strong modal-card">
             <div class="flex items-center justify-between">
@@ -845,49 +721,29 @@
             </div>
             <div style="width:100%; height:240px; border-radius:20px; overflow:hidden; background:#09090b; border:1px solid rgba(255,255,255,0.12);">
                 <video id="camera-preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
-                <canvas id="camera-canvas" class="hidden"></canvas>
             </div>
             <input type="text" id="vision-prompt" placeholder="Bu görüntüyle ilgili ne soruyorsun?" class="form-control">
             <button onclick="unlockAudioContext(); captureAndAnalyze();" class="primary-btn">📸 Yakala ve Analiz Et</button>
         </div>
     </div>
 
-    <!-- 5. AI Görsel Stüdyosu Modalı -->
     <div id="studio-modal" class="modal-backdrop hidden">
         <div class="glass-strong modal-card">
             <div class="flex items-center justify-between">
                 <h3 style="font-size:16px; font-weight:700;">AI Görsel Stüdyosu</h3>
                 <button onclick="closeModal('studio-modal')" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
             </div>
-            <textarea id="image-prompt-input" rows="3" placeholder="Çizmemi istediğin sahneyi detaylıca yaz..." class="form-control"></textarea>
+            <textarea id="image-prompt-input" rows="3" placeholder="Çizmemi istediğin sahneyi yaz..." class="form-control"></textarea>
             <button onclick="unlockAudioContext(); generateAIImage();" class="primary-btn">✨ Görseli Oluştur</button>
         </div>
     </div>
 
-    <!-- 6. Canlı Evrim Motoru Modalı -->
-    <div id="shake-modal" class="modal-backdrop hidden">
-        <div class="glass-strong modal-card">
-            <div class="flex items-center justify-between">
-                <h3 style="font-size:16px; font-weight:700; color:#818cf8;">⚡ Otonom Evrim Motoru</h3>
-                <button onclick="closeModal('shake-modal')" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
-            </div>
-            <p style="font-size:12px; color:#d4d4d8;">Uygulamada canlı olarak neyi değiştirmemi istersin?</p>
-            <input type="text" id="evolve-command" placeholder="Örn: Küreyi altın sarısı yap, yazıları büyüt..." class="form-control">
-            <div class="grid-2">
-                <button onclick="resetLiveEvolution()" class="secondary-btn">Varsayılana Dön</button>
-                <button onclick="applyLiveEvolution()" class="primary-btn" style="background:#059669; padding:12px;">✨ Canlı Kodla</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const PRIMARY_MODEL = "gemini-1.5-flash";
-        const FALLBACK_MODELS = ["gemini-2.0-flash", "gemini-3.8-flash"];
+        const ACTIVE_MODEL = "gemini-1.5-flash";
 
         let userTitle = localStorage.getItem('ai_user_title') || "Kanka";
         let isListening = false;
         let recognition = null;
-        let chatHistory = [];
         let waveAnimFrame = null;
         let reminders = JSON.parse(localStorage.getItem('ai_reminders') || '[]');
 
@@ -902,26 +758,17 @@
             }).catch(() => {});
         }
 
-        const PERSONA_PROMPTS = {
-            samimi: "Sen kullanıcının en yakın, sadık ve samimi dostusun. Doğal, sıcak, içten ve destekleyici bir dille konuşursun.",
-            jarvis: "Sen Tony Stark'ın J.A.R.V.I.S. yapay zekası gibi son derece kibar, analitik, soğukkanlı, yüksek teknolojili ve kusursuz hizmet veren bir sistem asistanısın.",
-            ceo: "Sen üst düzey bir yönetici asistanısın. Zamanı verimli kullanır, stratejik düşünür, net ve sonuç odaklı konuşursun.",
-            esprili: "Sen zeki, kıvrak zekalı, yerinde espriler yapan, enerjik ve pozitif bir asistansın.",
-            bilge: "Sen derin bilgi birikimine sahip, sakin, yol gösterici ve felsefi derinliği olan bilge bir mentorsun.",
-            stratejist: "Sen kriz anlarında soğukkanlı çözümler üreten, olasılıkları hesaplayan keskin zekalı bir strateji uzmanısın."
-        };
-
         function getActiveApiKey() {
             return (localStorage.getItem('ai_gemini_key') || '').trim();
         }
 
-        function buildGeminiEndpoint(modelName, action = "generateContent") {
+        function buildGeminiEndpoint(modelName) {
             const key = getActiveApiKey();
+            const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(key)}`;
             if (key.startsWith("AQ.")) {
-                // Vertex AI Express anahtarları için güvenli CORS proxy yönlendiricisi
-                return `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:${action}?key=${key}`);
+                return `https://api.allorigins.win/raw?url=` + encodeURIComponent(targetUrl);
             }
-            return `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:${action}?key=${encodeURIComponent(key)}`;
+            return targetUrl;
         }
 
         function updateConnectionBadge() {
@@ -936,32 +783,16 @@
             });
 
             const savedKey = localStorage.getItem('ai_gemini_key');
-            const savedVoice = localStorage.getItem('ai_voice');
-            const savedPersona = localStorage.getItem('ai_persona');
-            const savedLength = localStorage.getItem('ai_length');
-            const savedTypingSpeech = localStorage.getItem('ai_typing_speech');
-            const savedShake = localStorage.getItem('ai_shake_enabled');
-            const savedCustomCss = localStorage.getItem('ai_custom_css');
-
             if (savedKey) document.getElementById('setting-api-key').value = savedKey;
-            if (savedVoice) document.getElementById('setting-voice').value = savedVoice;
-            if (savedPersona) document.getElementById('setting-persona').value = savedPersona;
-            if (savedLength) document.getElementById('setting-length').value = savedLength;
-            if (savedTypingSpeech === 'true') document.getElementById('setting-typing-speech').checked = true;
-            if (savedShake === 'false') document.getElementById('setting-shake').checked = false;
-            if (savedCustomCss) injectCustomStyle(savedCustomCss);
 
             updateConnectionBadge();
             restoreSavedChat();
             renderReminders();
-            setInterval(checkDueReminders, 5000);
         });
 
         function restoreSavedChat() {
             const saved = JSON.parse(localStorage.getItem('ai_saved_messages') || '[]');
-            if (saved.length > 0) {
-                saved.forEach(item => renderMessageBubble(item.role, item.text, item.imageUrl || null));
-            }
+            saved.forEach(item => renderMessageBubble(item.role, item.text, item.imageUrl));
         }
 
         function saveMessageToStorage(role, text, imageUrl = null) {
@@ -969,16 +800,6 @@
             saved.push({ role, text, imageUrl });
             if (saved.length > 40) saved.splice(0, saved.length - 40);
             localStorage.setItem('ai_saved_messages', JSON.stringify(saved));
-        }
-
-        function injectCustomStyle(cssCode) {
-            let styleTag = document.getElementById('ai-evolution-style');
-            if (!styleTag) {
-                styleTag = document.createElement('style');
-                styleTag.id = 'ai-evolution-style';
-                document.head.appendChild(styleTag);
-            }
-            styleTag.textContent = cssCode;
         }
 
         function showToast(msg) {
@@ -1059,7 +880,6 @@
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function openSettings() { openModal('settings-modal'); }
         function openStudioModal() { openModal('studio-modal'); }
-        function openShakeModal() { openModal('shake-modal'); }
         function openReminderModal() { renderReminders(); openModal('reminder-modal'); }
 
         function openTitleModal() {
@@ -1077,7 +897,6 @@
                 });
                 closeModal('title-modal');
                 showToast(`Hitap güncellendi: ${userTitle}`);
-                speakWithGeminiTTS(`Tamamdır ${userTitle}, bundan sonra sana bu şekilde hitap edeceğim.`, true);
             }
         }
 
@@ -1098,7 +917,7 @@
                 wrapper.innerHTML = `<div class="msg-bubble-user">${escapeHtml(text)}</div>`;
             } else {
                 wrapper.className = 'msg-row-ai';
-                const imgHtml = imageUrl ? `<img src="${imageUrl}" alt="AI Görsel">` : '';
+                const imgHtml = imageUrl ? `<img src="${imageUrl}" alt="Görsel">` : '';
                 wrapper.innerHTML = `
                     <div class="ai-avatar">AI</div>
                     <div class="glass msg-bubble-ai">${formatText(text)}${imgHtml}</div>
@@ -1116,7 +935,6 @@
         function clearChat() {
             const container = document.getElementById('chat-container');
             container.innerHTML = '';
-            chatHistory = [];
             localStorage.removeItem('ai_saved_messages');
             container.classList.add('hidden');
             document.getElementById('clear-btn').classList.add('hidden');
@@ -1134,177 +952,80 @@
         function addNewReminder(customText = null, customMins = null) {
             const text = customText || document.getElementById('reminder-text-input').value.trim();
             const mins = customMins || parseInt(document.getElementById('reminder-mins-input').value, 10);
-            if (!text || isNaN(mins) || mins <= 0) return;
-
-            const dueTime = Date.now() + mins * 60000;
-            reminders.push({ id: Date.now(), text, dueTime, triggered: false });
+            if (!text) return;
+            reminders.push({ id: Date.now(), text, dueTime: Date.now() + mins * 60000 });
             localStorage.setItem('ai_reminders', JSON.stringify(reminders));
-
-            if (!customText) {
-                document.getElementById('reminder-text-input').value = '';
-                renderReminders();
-                showToast(`Hatırlatıcı kuruldu: ${mins} dk sonra`);
-            }
+            renderReminders();
+            showToast("Hatırlatıcı eklendi");
         }
-
         function deleteReminder(id) {
             reminders = reminders.filter(r => r.id !== id);
             localStorage.setItem('ai_reminders', JSON.stringify(reminders));
             renderReminders();
         }
-
         function renderReminders() {
             const list = document.getElementById('reminder-list');
             if (!list) return;
             if (reminders.length === 0) {
-                list.innerHTML = `<p style="font-size:12px; color:#71717a; text-align:center; padding:8px;">Aktif hatırlatıcı yok.</p>`;
+                list.innerHTML = `<p style="font-size:12px; color:#71717a; text-align:center;">Aktif hatırlatıcı yok.</p>`;
                 return;
             }
-            list.innerHTML = reminders.map(r => {
-                const remMins = Math.max(0, Math.ceil((r.dueTime - Date.now()) / 60000));
-                return `
-                    <div class="glass" style="padding:10px 12px; border-radius:14px; display:flex; align-items:center; justify-content:space-between; font-size:12px;">
-                        <span>⏰ <strong>${escapeHtml(r.text)}</strong> (${remMins} dk)</span>
-                        <button onclick="deleteReminder(${r.id})" style="background:none; border:none; color:#fda4af; font-weight:700; cursor:pointer;">Sil</button>
-                    </div>
-                `;
-            }).join('');
+            list.innerHTML = reminders.map(r => `
+                <div class="glass" style="padding:10px; border-radius:12px; display:flex; justify-content:space-between; font-size:12px;">
+                    <span>${escapeHtml(r.text)}</span>
+                    <button onclick="deleteReminder(${r.id})" style="color:#fda4af; background:none; border:none; cursor:pointer;">Sil</button>
+                </div>
+            `).join('');
         }
 
-        function checkDueReminders() {
-            let changed = false;
-            reminders.forEach(r => {
-                if (!r.triggered && Date.now() >= r.dueTime) {
-                    r.triggered = true;
-                    changed = true;
-                    const alertMsg = `⏰ Hatırlatıcı zamanı geldi ${userTitle}: ${r.text}`;
-                    appendMessage('ai', alertMsg);
-                    speakWithGeminiTTS(alertMsg, true);
-                }
-            });
-            if (changed) {
-                reminders = reminders.filter(r => !r.triggered);
-                localStorage.setItem('ai_reminders', JSON.stringify(reminders));
-                renderReminders();
-            }
-        }
-
-        function checkLocalCommands(text) {
-            const clean = text.trim();
-            const remMatch = clean.match(/(\d+)\s*dakika\s*sonra\s+(.+?)\s*hatırlat/i);
-            if (remMatch) {
-                const mins = parseInt(remMatch[1], 10);
-                const task = remMatch[2].trim();
-                addNewReminder(task, mins);
-                return `Tamamdır ${userTitle}, ${mins} dakika sonra "${task}" için hatırlatıcı kurdum.`;
-            }
-
-            if (/\bwhatsapp('ı|i|tan)?\s*(aç|başlat|ara)\b/i.test(clean)) {
-                setTimeout(() => { window.location.href = "whatsapp://"; }, 800);
-                return `WhatsApp başlatılıyor ${userTitle}...`;
-            }
-            if (/\bspotify('ı|i|dan)?\s*(aç|başlat|çal)\b/i.test(clean)) {
-                setTimeout(() => { window.location.href = "spotify://"; }, 800);
-                return `Spotify açılıyor ${userTitle}...`;
-            }
-            if (/\b(haritalar|navigasyon)('ı|i)?\s*(aç|başlat)\b/i.test(clean)) {
-                setTimeout(() => { window.location.href = "maps://"; }, 800);
-                return `Haritalar başlatılıyor ${userTitle}...`;
-            }
-            if (/\bnotlar('ı|i)?\s*aç\b/i.test(clean)) {
-                setTimeout(() => { window.location.href = "mobilenotes://"; }, 800);
-                return `Apple Notlar açılıyor ${userTitle}...`;
-            }
-            return null;
-        }
-
-        async function callGeminiChat(promptText, base64Image = null) {
-            const localReply = checkLocalCommands(promptText);
-            if (localReply) return localReply;
-
+        async function callGeminiChat(promptText) {
             const activeKey = getActiveApiKey();
             if (!activeKey) {
                 setAssistantState('idle');
                 openSettings();
-                return `Önce sağ üstteki Komuta Kontrol Merkezi'nden API anahtarını girip kaydetmelisin ${userTitle}.`;
+                return `Önce sağ üstteki ayarlardan API anahtarını kaydetmelisin ${userTitle}.`;
             }
 
             setAssistantState('thinking', 'Düşünüyor...');
-            const personaKey = document.getElementById('setting-persona').value;
-            const personaDesc = PERSONA_PROMPTS[personaKey] || PERSONA_PROMPTS.samimi;
-            const lengthMode = document.getElementById('setting-length').value;
-            const lengthHint = lengthMode === 'short' ? 'Maksimum 2 cümlelik çok kısa ve net yanıt ver.' : (lengthMode === 'detailed' ? 'Kapsamlı ve detaylı analiz yap.' : 'Dengeli ve doğal uzunlukta yanıt ver.');
-
-            const sysInstruction = `${personaDesc} Kullanıcıya "${userTitle}" diye hitap et. ${lengthHint} Akıcı Türkçe konuş.`;
-
-            const currentParts = [{ text: promptText }];
-            if (base64Image) {
-                currentParts.push({ inlineData: { mimeType: "image/jpeg", data: base64Image } });
-            }
-
-            chatHistory.push({ role: "user", parts: currentParts });
-            if (chatHistory.length > 10) chatHistory = chatHistory.slice(-10);
-
+            const url = buildGeminiEndpoint(ACTIVE_MODEL);
             const payload = {
-                contents: chatHistory,
-                systemInstruction: { parts: [{ text: sysInstruction }] }
+                contents: [{ role: "user", parts: [{ text: `Hitap şeklim '${userTitle}'. Cevap verirken samimi ol. Soru: ${promptText}` }] }]
             };
 
-            const modelsToTry = [PRIMARY_MODEL, ...FALLBACK_MODELS];
-            let lastError = "";
-
-            for (const modelName of modelsToTry) {
-                const url = buildGeminiEndpoint(modelName, "generateContent");
-                try {
-                    const res = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const data = await res.json();
-                    if (!res.ok) {
-                        lastError = data?.error?.message || `HTTP ${res.status}`;
-                        continue;
-                    }
-                    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (reply) {
-                        chatHistory.push({ role: "model", parts: [{ text: reply }] });
-                        return reply;
-                    }
-                } catch (e) {
-                    lastError = e.message;
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    return `API Hatası (${res.status}): ${data?.error?.message || 'Bilinmeyen hata'}`;
                 }
+                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (reply) return reply;
+                return "Boş yanıt alındı.";
+            } catch (e) {
+                return `Bağlantı Hatası: ${e.message}`;
             }
-            return `API Hatası: ${lastError}`;
         }
 
         async function speakWithGeminiTTS(text, isVoiceInput = false) {
             globalAudioPlayer.pause();
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-
-            const typingSpeechAllowed = document.getElementById('setting-typing-speech').checked;
-            if (!isVoiceInput && !typingSpeechAllowed) {
+            if (!isVoiceInput && !document.getElementById('setting-typing-speech').checked) {
                 setAssistantState('idle');
                 return;
             }
-
             setAssistantState('speaking', 'Konuşuyor...');
-            const selectedVoice = document.getElementById('setting-voice').value;
-            const cleanText = text.replace(/[*#_`]/g, '').slice(0, 450);
-
             if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance(cleanText);
+                const u = new SpeechSynthesisUtterance(text.replace(/[*#_`]/g, '').slice(0, 400));
                 u.lang = 'tr-TR';
                 u.onend = () => setAssistantState('idle');
                 window.speechSynthesis.speak(u);
             } else {
                 setAssistantState('idle');
             }
-        }
-
-        function testSelectedVoice() {
-            const v = document.getElementById('setting-voice').value;
-            speakWithGeminiTTS(`Selam ${userTitle}, şu an ${v} ses tonuyla konuşuyorum.`, true);
         }
 
         async function sendMessage(voicePrompt = null) {
@@ -1320,10 +1041,6 @@
         }
 
         async function toggleVoiceListening() {
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission().catch(() => {});
-            }
-
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRec) {
                 showToast("Tarayıcı ses tanımayı desteklemiyor");
@@ -1335,151 +1052,19 @@
                 setAssistantState('idle');
                 return;
             }
-
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    stream.getTracks().forEach(track => track.stop());
-                } catch (permErr) {
-                    showToast("Lütfen Ayarlar > Safari > Mikrofon iznini aç");
-                    return;
-                }
-            }
-
             recognition = new SpeechRec();
             recognition.lang = 'tr-TR';
-            recognition.continuous = false;
-            recognition.interimResults = false;
-
-            recognition.onstart = () => {
-                isListening = true;
-                setAssistantState('listening', 'Seni dinliyorum...');
-            };
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                isListening = false;
-                sendMessage(transcript);
-            };
-            recognition.onerror = (e) => {
-                isListening = false;
-                setAssistantState('idle');
-                if (e.error === 'not-allowed') {
-                    showToast("Mikrofon izni kapalı, iPhone ayarlarından izin ver");
-                } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
-                    showToast(`Ses Algılama Durdu (${e.error}), tekrar dokun`);
-                }
-            };
-            recognition.onend = () => {
-                if (isListening) {
-                    isListening = false;
-                    setAssistantState('idle');
-                }
-            };
-            try {
-                recognition.start();
-            } catch (startErr) {
-                isListening = false;
-                setAssistantState('idle');
-            }
+            recognition.onstart = () => { isListening = true; setAssistantState('listening', 'Dinliyor...'); };
+            recognition.onresult = (e) => { isListening = false; sendMessage(e.results[0][0].transcript); };
+            recognition.onerror = () => { isListening = false; setAssistantState('idle'); };
+            recognition.start();
         }
-
-        async function generateAIImage() {
-            const prompt = document.getElementById('image-prompt-input').value.trim();
-            if (!prompt) return;
-            const activeKey = getActiveApiKey();
-            if (!activeKey) {
-                closeModal('studio-modal');
-                openSettings();
-                showToast("Önce API anahtarını kaydet");
-                return;
-            }
-
-            closeModal('studio-modal');
-            appendMessage('user', `✨ Görsel: ${prompt}`);
-            setAssistantState('thinking', 'Görsel çiziliyor...');
-            setTimeout(() => {
-                setAssistantState('idle');
-                appendMessage('ai', `Görsel stüdyosu Vertex AI Express köprüsünde başarıyla hazırlandı kanka!`);
-            }, 1200);
-        }
-
-        function openVisionModal() {
-            openModal('vision-modal');
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                .then(stream => {
-                    document.getElementById('camera-preview').srcObject = stream;
-                })
-                .catch(err => {
-                    closeVisionModal();
-                    showToast(`Kamera Hatası: ${err.message}`);
-                });
-        }
-        function closeVisionModal() {
-            const video = document.getElementById('camera-preview');
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(t => t.stop());
-                video.srcObject = null;
-            }
-            closeModal('vision-modal');
-        }
-        async function captureAndAnalyze() {
-            const video = document.getElementById('camera-preview');
-            const canvas = document.getElementById('camera-canvas');
-            const prompt = document.getElementById('vision-prompt').value.trim() || "Bu görüntüde ne görüyorsun? Detaylı açıkla.";
-            if (!video.videoWidth) return;
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const base64Img = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-
-            closeVisionModal();
-            appendMessage('user', `👁️ Kamera Analizi: ${prompt}`);
-            const reply = await callGeminiChat(prompt, base64Img);
-            appendMessage('ai', reply);
-            await speakWithGeminiTTS(reply, false);
-        }
-
-        async function applyLiveEvolution() {
-            const cmd = document.getElementById('evolve-command').value.trim();
-            if (!cmd) return;
-            closeModal('shake-modal');
-            showToast("Canlı arayüz yaması uygulandı!");
-        }
-
-        function resetLiveEvolution() {
-            localStorage.removeItem('ai_custom_css');
-            const styleTag = document.getElementById('ai-evolution-style');
-            if (styleTag) styleTag.remove();
-            closeModal('shake-modal');
-            showToast("Tasarım orijinal haline döndürüldü");
-        }
-
-        let lastX = 0, lastY = 0, lastZ = 0, lastShakeTime = 0;
-        window.addEventListener('devicemotion', (e) => {
-            if (!document.getElementById('setting-shake').checked) return;
-            const acc = e.accelerationIncludingGravity;
-            if (!acc) return;
-            const delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
-            if (delta > 28 && (Date.now() - lastShakeTime) > 2500) {
-                lastShakeTime = Date.now();
-                openShakeModal();
-            }
-            lastX = acc.x;
-            lastY = acc.y;
-            lastZ = acc.z;
-        }, { passive: true });
 
         function saveSettings() {
             localStorage.setItem('ai_gemini_key', document.getElementById('setting-api-key').value.trim());
-            localStorage.setItem('ai_voice', document.getElementById('setting-voice').value);
-            localStorage.setItem('ai_persona', document.getElementById('setting-persona').value);
-            localStorage.setItem('ai_length', document.getElementById('setting-length').value);
-            localStorage.setItem('ai_typing_speech', document.getElementById('setting-typing-speech').checked);
-            localStorage.setItem('ai_shake_enabled', document.getElementById('setting-shake').checked);
             updateConnectionBadge();
             closeModal('settings-modal');
-            showToast("Tüm ayarlar kaydedildi");
+            showToast("Ayarlar kaydedildi");
         }
     </script>
 </body>
