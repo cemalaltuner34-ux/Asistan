@@ -1,1071 +1,1254 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Asistan">
-    <meta name="theme-color" content="#050507">
-    <title>Kişisel Asistanım</title>
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22K%C4%B1%C5%9Fisel%20Asistan%C4%B1m%22%2C%22short_name%22%3A%22Asistan%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23050507%22%2C%22theme_color%22%3A%22%23050507%22%7D">
-    <style>
-        :root {
-            --bg-main: #050507;
-            --glass-bg: rgba(20, 22, 30, 0.78);
-            --glass-strong: rgba(13, 14, 20, 0.96);
-            --border-subtle: rgba(255, 255, 255, 0.1);
-            --accent: #6366f1;
-            --text-main: #f4f4f6;
-            --text-muted: #a1a1aa;
-        }
-        * {
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
-            user-select: none;
-            margin: 0;
-            padding: 0;
-        }
-        input, textarea, select {
-            user-select: text;
-            font-family: inherit;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-            background: radial-gradient(circle at 50% 0%, #121526 0%, var(--bg-main) 65%);
-            color: var(--text-main);
-            height: 100dvh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .justify-center { justify-content: center; }
-
-        .glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
-            border: 1px solid var(--border-subtle);
-        }
-        .glass-strong {
-            background: var(--glass-strong);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.13);
-        }
-
-        /* Dinamik Ada */
-        .di-anchor {
-            position: fixed;
-            top: calc(max(env(safe-area-inset-top), 12px) + 6px);
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 45;
-            display: flex;
-            justify-content: center;
-        }
-        #di-pill {
-            position: relative;
-            background: #000000;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 24px;
-            min-height: 36px;
-            min-width: 136px;
-            max-width: 92vw;
-            padding: 0 14px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.98);
-            cursor: pointer;
-        }
-        #di-pill.expanded {
-            min-height: 44px;
-            min-width: 256px;
-            padding: 0 18px;
-            border-color: rgba(255, 255, 255, 0.25);
-        }
-        #di-pill.drawer-open {
-            min-width: 316px;
-            padding: 12px 16px;
-            border-radius: 28px;
-            border-color: rgba(129, 140, 248, 0.4);
-        }
-        #di-pill.expanded::before,
-        #di-pill.drawer-open::before {
-            content: "";
-            position: absolute;
-            inset: -1.5px;
-            border-radius: inherit;
-            padding: 1.5px;
-            background: linear-gradient(90deg, #38bdf8, #818cf8, #e879f9, #fb7185, #34d399, #38bdf8);
-            background-size: 300% 100%;
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            animation: diAuraFlow 3.5s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes diAuraFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .di-top-row {
-            width: 100%;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            background: #000000;
-        }
-        #di-pill.expanded .di-top-row { height: 44px; }
-        .di-waves {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            height: 20px;
-        }
-        .di-bar {
-            width: 3.2px;
-            height: 18px;
-            border-radius: 99px;
-            transform: scaleY(0.28);
-            transition: transform 0.08s linear;
-        }
-        #di-pill.listening .di-bar { background: linear-gradient(180deg, #fda4af, #f43f5e); }
-        #di-pill.thinking .di-bar { background: linear-gradient(180deg, #7dd3fc, #818cf8); }
-        #di-pill.speaking .di-bar { background: linear-gradient(180deg, #6ee7b7, #10b981); }
-        #di-text {
-            font-size: 13px;
-            font-weight: 500;
-            color: #ffffff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 175px;
-        }
-        .di-chevron-btn {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.12);
-            border: none;
-            color: #d4d4d8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .di-drawer {
-            width: 100%;
-            padding-top: 10px;
-            margin-top: 6px;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            background: #000000;
-        }
-        .di-drawer-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px 4px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.06);
-            border: none;
-            color: #e4e4e7;
-            font-size: 10px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        /* Üst Kontroller */
-        header {
-            padding-top: calc(max(env(safe-area-inset-top), 12px) + 56px);
-            padding-left: 16px;
-            padding-right: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 30;
-        }
-        .title-badge {
-            padding: 6px 14px;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-main);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-        .dot-green { background: #34d399; box-shadow: 0 0 8px #34d399; }
-        .dot-amber { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
-        .icon-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #e4e4e7;
-            cursor: pointer;
-        }
-
-        /* Merkez Sahne & Küre */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 0 16px;
-            overflow: hidden;
-            position: relative;
-        }
-        .orb-stage {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .orb-wrapper {
-            position: relative;
-            width: 220px;
-            height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: width 0.45s cubic-bezier(0.34, 1.4, 0.64, 1), height 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
-            cursor: pointer;
-        }
-        .orb-wrapper.compact {
-            width: 96px;
-            height: 96px;
-        }
-        .orb-halo {
-            position: absolute;
-            inset: -24px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(56, 189, 248, 0.16) 45%, transparent 72%);
-            filter: blur(22px);
-            animation: breatheHalo 5s ease-in-out infinite;
-            pointer-events: none;
-        }
-        .orb-ring-1 {
-            position: absolute;
-            inset: 4px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-top-color: rgba(129, 140, 248, 0.75);
-            border-bottom-color: rgba(56, 189, 248, 0.55);
-            animation: spinSlow 11s linear infinite;
-            pointer-events: none;
-        }
-        .orb-ring-2 {
-            position: absolute;
-            inset: 14px;
-            border-radius: 50%;
-            border: 1px solid rgba(232, 121, 249, 0.22);
-            border-left-color: rgba(232, 121, 249, 0.7);
-            animation: spinReverse 16s linear infinite;
-            pointer-events: none;
-        }
-        .orb-core {
-            position: relative;
-            width: 74%;
-            height: 74%;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 25%, #1e2238 0%, #0b0d17 65%, #040508 100%);
-            box-shadow:
-                inset 0 2px 14px rgba(255, 255, 255, 0.28),
-                inset 0 -14px 26px rgba(79, 70, 229, 0.65),
-                0 14px 36px rgba(0, 0, 0, 0.85),
-                0 0 32px rgba(99, 102, 241, 0.35);
-            overflow: hidden;
-            animation: floatOrb 5.5s ease-in-out infinite;
-        }
-        .orb-plasma {
-            position: absolute;
-            inset: -15%;
-            border-radius: 42% 58% 63% 37% / 45% 42% 58% 55%;
-            background:
-                radial-gradient(circle at 30% 35%, rgba(56, 189, 248, 0.85), transparent 55%),
-                radial-gradient(circle at 70% 65%, rgba(168, 85, 247, 0.85), transparent 55%),
-                radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.9), transparent 60%);
-            filter: blur(14px);
-            opacity: 0.9;
-            animation: liquidMorph 8s ease-in-out infinite alternate, spinSlow 14s linear infinite;
-        }
-        .orb-hint {
-            margin-top: 18px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-align: center;
-        }
-
-        /* Sohbet Balonları */
-        #chat-container {
-            width: 100%;
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .msg-row-user { display: flex; justify-content: flex-end; }
-        .msg-bubble-user {
-            background: var(--accent);
-            color: #ffffff;
-            padding: 10px 15px;
-            border-radius: 20px 20px 4px 20px;
-            max-width: 82%;
-            font-size: 14px;
-            line-height: 1.45;
-            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
-            word-wrap: break-word;
-        }
-        .msg-row-ai { display: flex; align-items: flex-start; gap: 10px; }
-        .ai-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            color: #fff;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-        .msg-bubble-ai {
-            padding: 10px 15px;
-            border-radius: 20px 20px 20px 4px;
-            max-width: 82%;
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--text-main);
-            word-wrap: break-word;
-        }
-        .msg-bubble-ai img {
-            margin-top: 10px;
-            border-radius: 14px;
-            width: 100%;
-            max-width: 280px;
-            border: 1px solid rgba(255,255,255,0.12);
-        }
-
-        /* Alt Kontrol Çubuğu */
-        footer {
-            padding: 8px 16px max(env(safe-area-inset-bottom), 16px) 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 30;
-        }
-        .chips-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .chips-row::-webkit-scrollbar { display: none; }
-        .chip-btn {
-            padding: 7px 13px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 500;
-            color: #e4e4e7;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-        .chip-danger { color: #fda4af; border-color: rgba(244, 63, 94, 0.3); }
-
-        .input-bar {
-            border-radius: 26px;
-            padding: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
-        }
-        .input-bar input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 10px 14px;
-            font-size: 14px;
-            color: #ffffff;
-            outline: none;
-        }
-        .input-bar input::placeholder { color: #71717a; }
-        .action-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 16px;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .btn-mic { background: rgba(255, 255, 255, 0.07); color: #e4e4e7; }
-        .btn-send { background: var(--accent); color: #ffffff; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
-
-        /* Modallar */
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .modal-backdrop.bottom-sheet {
-            align-items: flex-end;
-            padding: 0;
-        }
-        .modal-card {
-            width: 100%;
-            max-width: 420px;
-            border-radius: 28px;
-            padding: 22px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .bottom-sheet .modal-card {
-            max-width: 100%;
-            border-radius: 32px 32px 0 0;
-            max-height: 88vh;
-            overflow-y: auto;
-            padding-bottom: max(env(safe-area-inset-bottom), 24px);
-        }
-        .form-label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #818cf8;
-            margin-bottom: 6px;
-            display: block;
-        }
-        .form-control {
-            width: 100%;
-            background: #18181b;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 16px;
-            padding: 12px 14px;
-            font-size: 13px;
-            color: #ffffff;
-            outline: none;
-        }
-        .primary-btn {
-            width: 100%;
-            background: var(--accent);
-            border: none;
-            border-radius: 16px;
-            padding: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #ffffff;
-            cursor: pointer;
-        }
-        .secondary-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: none;
-            border-radius: 16px;
-            padding: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #e4e4e7;
-            cursor: pointer;
-        }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #e4e4e7;
-            padding: 4px 0;
-        }
-        .toggle-row input { width: 18px; height: 18px; accent-color: var(--accent); }
-
-        #toast-box {
-            position: fixed;
-            top: calc(max(env(safe-area-inset-top), 12px) + 56px);
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 60;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-        }
-        #toast-text {
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #fff;
-            white-space: nowrap;
-        }
-
-        @keyframes floatOrb {
-            0%, 100% { transform: translate3d(0, 0, 0); }
-            50% { transform: translate3d(0, -7px, 0); }
-        }
-        @keyframes breatheHalo {
-            0%, 100% { transform: scale(0.96); opacity: 0.75; }
-            50% { transform: scale(1.08); opacity: 1; }
-        }
-        @keyframes spinSlow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        @keyframes spinReverse {
-            from { transform: rotate(360deg); }
-            to { transform: rotate(0deg); }
-        }
-        @keyframes liquidMorph {
-            0% { border-radius: 42% 58% 63% 37% / 45% 42% 58% 55%; transform: scale(0.96); }
-            50% { border-radius: 58% 42% 38% 62% / 55% 60% 40% 45%; transform: scale(1.06); }
-            100% { border-radius: 46% 54% 52% 48% / 40% 48% 52% 60%; transform: scale(0.98); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Asistan">
+<meta name="theme-color" content="#050507">
+<title>Kişisel Asistanım</title>
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22K%C4%B1%C5%9Fisel%20Asistan%C4%B1m%22%2C%22short_name%22%3A%22Asistan%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23050507%22%2C%22theme_color%22%3A%22%23050507%22%7D">
+<style>
+:root {
+  --bg-main: #050507;
+  --glass-bg: rgba(20, 22, 30, 0.78);
+  --glass-strong: rgba(13, 14, 20, 0.96);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --accent: #6366f1;
+  --text-main: #f4f4f6;
+  --text-muted: #a1a1aa;
+}
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  user-select: none;
+  margin: 0;
+  padding: 0;
+}
+input, textarea, select {
+  user-select: text;
+  font-family: inherit;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  background: radial-gradient(circle at 50% 0%, #121526 0%, var(--bg-main) 65%);
+  color: var(--text-main);
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.hidden { display: none !important; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid var(--border-subtle);
+}
+.glass-strong {
+  background: var(--glass-strong);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+}
+/* Dinamik Ada */
+.di-anchor {
+  position: fixed;
+  top: calc(max(env(safe-area-inset-top), 12px) + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 45;
+  display: flex;
+  justify-content: center;
+}
+#di-pill {
+  position: relative;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  min-height: 36px;
+  min-width: 136px;
+  max-width: 92vw;
+  padding: 0 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.98);
+  cursor: pointer;
+}
+#di-pill.expanded {
+  min-height: 44px;
+  min-width: 256px;
+  padding: 0 18px;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+#di-pill.drawer-open {
+  min-width: 316px;
+  padding: 12px 16px;
+  border-radius: 28px;
+  border-color: rgba(129, 140, 248, 0.4);
+}
+#di-pill.expanded::before,
+#di-pill.drawer-open::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(90deg, #38bdf8, #818cf8, #e879f9, #fb7185, #34d399, #38bdf8);
+  background-size: 300% 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: diAuraFlow 3.5s linear infinite;
+  pointer-events: none;
+}
+@keyframes diAuraFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.di-top-row {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #000000;
+}
+#di-pill.expanded .di-top-row { height: 44px; }
+.di-waves {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+}
+.di-bar {
+  width: 3.2px;
+  height: 18px;
+  border-radius: 99px;
+  transform: scaleY(0.28);
+  transition: transform 0.08s linear;
+}
+#di-pill.listening .di-bar { background: linear-gradient(180deg, #fda4af, #f43f5e); }
+#di-pill.thinking .di-bar { background: linear-gradient(180deg, #7dd3fc, #818cf8); }
+#di-pill.speaking .di-bar { background: linear-gradient(180deg, #6ee7b7, #10b981); }
+#di-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 175px;
+}
+.di-chevron-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #d4d4d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.di-drawer {
+  width: 100%;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: #000000;
+}
+.di-drawer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  color: #e4e4e7;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+/* Üst Kontroller */
+header {
+  padding-top: calc(max(env(safe-area-inset-top), 12px) + 56px);
+  padding-left: 16px;
+  padding-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 30;
+}
+.title-badge {
+  padding: 6px 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dot-green { background: #34d399; box-shadow: 0 0 8px #34d399; }
+.dot-amber { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e4e4e7;
+  cursor: pointer;
+}
+/* Merkez Sahne & Küre */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  overflow: hidden;
+  position: relative;
+}
+.orb-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.orb-wrapper {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.45s cubic-bezier(0.34, 1.4, 0.64, 1), height 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
+  cursor: pointer;
+}
+.orb-wrapper.compact {
+  width: 96px;
+  height: 96px;
+}
+.orb-halo {
+  position: absolute;
+  inset: -24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(56, 189, 248, 0.16) 45%, transparent 72%);
+  filter: blur(22px);
+  animation: breatheHalo 5s ease-in-out infinite;
+  pointer-events: none;
+}
+.orb-ring-1 {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(129, 140, 248, 0.75);
+  border-bottom-color: rgba(56, 189, 248, 0.55);
+  animation: spinSlow 11s linear infinite;
+  pointer-events: none;
+}
+.orb-ring-2 {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 121, 249, 0.22);
+  border-left-color: rgba(232, 121, 249, 0.7);
+  animation: spinReverse 16s linear infinite;
+  pointer-events: none;
+}
+.orb-core {
+  position: relative;
+  width: 74%;
+  height: 74%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #1e2238 0%, #0b0d17 65%, #040508 100%);
+  box-shadow:
+    inset 0 2px 14px rgba(255, 255, 255, 0.28),
+    inset 0 -14px 26px rgba(79, 70, 229, 0.65),
+    0 14px 36px rgba(0, 0, 0, 0.85),
+    0 0 32px rgba(99, 102, 241, 0.35);
+  overflow: hidden;
+  animation: floatOrb 5.5s ease-in-out infinite;
+}
+.orb-plasma {
+  position: absolute;
+  inset: -15%;
+  border-radius: 42% 58% 63% 37% / 45% 42% 58% 55%;
+  background:
+    radial-gradient(circle at 30% 35%, rgba(56, 189, 248, 0.85), transparent 55%),
+    radial-gradient(circle at 70% 65%, rgba(168, 85, 247, 0.85), transparent 55%),
+    radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.9), transparent 60%);
+  filter: blur(14px);
+  opacity: 0.9;
+  animation: liquidMorph 8s ease-in-out infinite alternate, spinSlow 14s linear infinite;
+}
+.orb-hint {
+  margin-top: 18px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+}
+/* Sohbet Balonları */
+#chat-container {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.msg-row-user { display: flex; justify-content: flex-end; }
+.msg-bubble-user {
+  background: var(--accent);
+  color: #ffffff;
+  padding: 10px 15px;
+  border-radius: 20px 20px 4px 20px;
+  max-width: 82%;
+  font-size: 14px;
+  line-height: 1.45;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+  word-wrap: break-word;
+}
+.msg-row-ai { display: flex; align-items: flex-start; gap: 10px; }
+.ai-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.msg-bubble-ai {
+  padding: 10px 15px;
+  border-radius: 20px 20px 20px 4px;
+  max-width: 82%;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-main);
+  word-wrap: break-word;
+}
+.msg-bubble-ai img {
+  margin-top: 10px;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 280px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+/* Alt Kontrol Çubuğu */
+footer {
+  padding: 8px 16px max(env(safe-area-inset-bottom), 16px) 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 30;
+}
+.chips-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chips-row::-webkit-scrollbar { display: none; }
+.chip-btn {
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #e4e4e7;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.chip-danger { color: #fda4af; border-color: rgba(244, 63, 94, 0.3); }
+.input-bar {
+  border-radius: 26px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+}
+.input-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #ffffff;
+  outline: none;
+}
+.input-bar input::placeholder { color: #71717a; }
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.btn-mic { background: rgba(255, 255, 255, 0.07); color: #e4e4e7; }
+.btn-send { background: var(--accent); color: #ffffff; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
+/* Modallar */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-backdrop.bottom-sheet {
+  align-items: flex-end;
+  padding: 0;
+}
+.modal-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 28px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.bottom-sheet .modal-card {
+  max-width: 100%;
+  border-radius: 32px 32px 0 0;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding-bottom: max(env(safe-area-inset-bottom), 24px);
+}
+.form-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #818cf8;
+  margin-bottom: 6px;
+  display: block;
+}
+.form-control {
+  width: 100%;
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #ffffff;
+  outline: none;
+}
+.primary-btn {
+  width: 100%;
+  background: var(--accent);
+  border: none;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+}
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 16px;
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e4e4e7;
+  cursor: pointer;
+}
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #e4e4e7;
+  padding: 4px 0;
+}
+.toggle-row input { width: 18px; height: 18px; accent-color: var(--accent); }
+#toast-box {
+  position: fixed;
+  top: calc(max(env(safe-area-inset-top), 12px) + 56px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+#toast-text {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+@keyframes floatOrb {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -7px, 0); }
+}
+@keyframes breatheHalo {
+  0%, 100% { transform: scale(0.96); opacity: 0.75; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes spinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+@keyframes liquidMorph {
+  0% { border-radius: 42% 58% 63% 37% / 45% 42% 58% 55%; transform: scale(0.96); }
+  50% { border-radius: 58% 42% 38% 62% / 55% 60% 40% 45%; transform: scale(1.06); }
+  100% { border-radius: 46% 54% 52% 48% / 40% 48% 52% 60%; transform: scale(0.98); }
+}
+</style>
 </head>
 <body>
+<div id="toast-box">
+  <div id="toast-text" class="glass-strong"></div>
+</div>
 
-    <div id="toast-box">
-        <div id="toast-text" class="glass-strong"></div>
+<!-- Dinamik Ada -->
+<div class="di-anchor">
+  <div id="di-pill">
+    <div class="di-top-row" onclick="unlockAudioContext(); toggleVoiceListening();">
+      <div id="di-waves" class="di-waves hidden">
+        <span class="di-bar"></span>
+        <span class="di-bar"></span>
+        <span class="di-bar"></span>
+        <span class="di-bar"></span>
+        <span class="di-bar"></span>
+      </div>
+      <span id="di-text">Hazır</span>
+      <button onclick="event.stopPropagation(); toggleDynamicDrawer();" aria-label="Ada Menüsü" class="di-chevron-btn">
+        <svg id="di-chevron" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 9l-7 7-7-7"></path></svg>
+      </button>
     </div>
-
-    <!-- Dinamik Ada -->
-    <div class="di-anchor">
-        <div id="di-pill">
-            <div class="di-top-row" onclick="unlockAudioContext(); toggleVoiceListening();">
-                <div id="di-waves" class="di-waves hidden">
-                    <span class="di-bar"></span>
-                    <span class="di-bar"></span>
-                    <span class="di-bar"></span>
-                    <span class="di-bar"></span>
-                    <span class="di-bar"></span>
-                </div>
-                <span id="di-text">Hazır</span>
-                <button onclick="event.stopPropagation(); toggleDynamicDrawer();" aria-label="Ada Menüsü" class="di-chevron-btn">
-                    <svg id="di-chevron" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-            </div>
-
-            <div id="di-drawer" class="di-drawer hidden">
-                <button onclick="toggleDynamicDrawer(); toggleVoiceListening();" class="di-drawer-item">
-                    <span>🎙️</span><span>Dinle</span>
-                </button>
-                <button onclick="toggleDynamicDrawer(); openVisionModal();" class="di-drawer-item">
-                    <span>👁️</span><span>AI Lens</span>
-                </button>
-                <button onclick="toggleDynamicDrawer(); openStudioModal();" class="di-drawer-item">
-                    <span>✨</span><span>Çizim</span>
-                </button>
-                <button onclick="toggleDynamicDrawer(); openReminderModal();" class="di-drawer-item">
-                    <span>⏰</span><span>Hatırlat</span>
-                </button>
-            </div>
-        </div>
+    <div id="di-drawer" class="di-drawer hidden">
+      <button onclick="toggleDynamicDrawer(); toggleVoiceListening();" class="di-drawer-item">
+        <span>🎙️</span><span>Dinle</span>
+      </button>
+      <button onclick="toggleDynamicDrawer(); openVisionModal();" class="di-drawer-item">
+        <span>👁️</span><span>AI Lens</span>
+      </button>
+      <button onclick="toggleDynamicDrawer(); openStudioModal();" class="di-drawer-item">
+        <span>✨</span><span>Çizim</span>
+      </button>
+      <button onclick="toggleDynamicDrawer(); openReminderModal();" class="di-drawer-item">
+        <span>⏰</span><span>Hatırlat</span>
+      </button>
     </div>
+  </div>
+</div>
 
-    <!-- Üst Kontroller -->
-    <header>
-        <button onclick="openTitleModal()" id="assistant-title-btn" class="glass title-badge">
-            <span id="api-status-dot" class="status-dot dot-amber"></span>
-            <span id="assistant-title-text">Kanka</span>
-            <svg width="13" height="13" fill="none" stroke="#a1a1aa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-        </button>
+<!-- Üst Kontroller -->
+<header>
+  <button onclick="openTitleModal()" id="assistant-title-btn" class="glass title-badge">
+    <span id="api-status-dot" class="status-dot dot-amber"></span>
+    <span id="assistant-title-text">Kanka</span>
+    <svg width="13" height="13" fill="none" stroke="#a1a1aa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+  </button>
+  <div style="display:flex; gap:8px;">
+    <button onclick="openReminderModal()" aria-label="Hatırlatıcılar" class="glass icon-btn">
+      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    </button>
+    <button onclick="openVisionModal()" aria-label="AI Lens" class="glass icon-btn">
+      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+    </button>
+    <button onclick="openSettings()" aria-label="Ayarlar" class="glass icon-btn">
+      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+    </button>
+  </div>
+</header>
 
-        <div style="display:flex; gap:8px;">
-            <button onclick="openReminderModal()" aria-label="Hatırlatıcılar" class="glass icon-btn">
-                <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </button>
-            <button onclick="openVisionModal()" aria-label="AI Lens" class="glass icon-btn">
-                <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><circle cx="12" cy="13" r="3"></circle></svg>
-            </button>
-            <button onclick="openSettings()" aria-label="Ayarlar" class="glass icon-btn">
-                <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            </button>
-        </div>
-    </header>
-
-    <!-- Merkez Sahne -->
-    <main>
-        <div id="orb-stage" class="orb-stage">
-            <div id="ai-orb" onclick="unlockAudioContext(); toggleVoiceListening();" class="orb-wrapper">
-                <div class="orb-halo"></div>
-                <div class="orb-ring-1"></div>
-                <div class="orb-ring-2"></div>
-                <div class="orb-core">
-                    <div class="orb-plasma"></div>
-                </div>
-            </div>
-            <p id="orb-hint" class="orb-hint">
-                Konuşmak için küreye dokun <span class="dynamic-user-title">kanka</span>
-            </p>
-        </div>
-
-        <div id="chat-container" class="hidden"></div>
-    </main>
-
-    <!-- Alt Kontrol Çubuğu -->
-    <footer>
-        <div class="chips-row">
-            <button onclick="openStudioModal()" class="glass chip-btn">✨ Görsel Oluştur</button>
-            <button onclick="openVisionModal()" class="glass chip-btn">👁️ Kameraya Bak</button>
-            <button onclick="openReminderModal()" class="glass chip-btn">⏰ Hatırlatıcı</button>
-            <button onclick="clearChat()" id="clear-btn" class="hidden glass chip-btn chip-danger">Sohbeti Temizle</button>
-        </div>
-
-        <div class="glass-strong input-bar">
-            <input type="text" id="user-input" onkeydown="if(event.key==='Enter'){ unlockAudioContext(); sendMessage(); }" placeholder="Bir şeyler yaz veya sor...">
-            <button onclick="unlockAudioContext(); toggleVoiceListening();" id="mic-btn" aria-label="Mikrofon" class="action-btn btn-mic">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-            </button>
-            <button onclick="unlockAudioContext(); sendMessage();" aria-label="Gönder" class="action-btn btn-send">
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 12h14M12 5l7 7-7 7"></path></svg>
-            </button>
-        </div>
-    </footer>
-
-    <!-- Modallar -->
-    <div id="title-modal" class="modal-backdrop hidden">
-        <div class="glass-strong modal-card">
-            <h3 style="font-size:16px; font-weight:700;">Sana Nasıl Hitap Edeyim?</h3>
-            <input type="text" id="title-input" placeholder="Örn: Kanka, Patron, Efendim..." class="form-control">
-            <div class="grid-2">
-                <button onclick="closeModal('title-modal')" class="secondary-btn">İptal</button>
-                <button onclick="saveUserTitle()" class="primary-btn" style="padding:12px;">Kaydet</button>
-            </div>
-        </div>
+<!-- Merkez Sahne -->
+<main>
+  <div id="orb-stage" class="orb-stage">
+    <div id="ai-orb" onclick="unlockAudioContext(); toggleVoiceListening();" class="orb-wrapper">
+      <div class="orb-halo"></div>
+      <div class="orb-ring-1"></div>
+      <div class="orb-ring-2"></div>
+      <div class="orb-core">
+        <div class="orb-plasma"></div>
+      </div>
     </div>
+    <p id="orb-hint" class="orb-hint">
+      Konuşmak için küreye dokun <span class="dynamic-user-title">kanka</span>
+    </p>
+  </div>
+  <div id="chat-container" class="hidden"></div>
+</main>
 
-    <div id="settings-modal" class="modal-backdrop bottom-sheet hidden">
-        <div class="glass-strong modal-card">
-            <div class="flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
-                <h2 style="font-size:16px; font-weight:700;">Komuta Kontrol Merkezi</h2>
-                <button onclick="closeModal('settings-modal')" style="background:none; border:none; color:#a1a1aa; font-weight:600; font-size:14px;">Kapat</button>
-            </div>
+<!-- Alt Kontrol Çubuğu -->
+<footer>
+  <div class="chips-row">
+    <button onclick="openStudioModal()" class="glass chip-btn">✨ Görsel Oluştur</button>
+    <button onclick="openVisionModal()" class="glass chip-btn">👁️ Kameraya Bak</button>
+    <button onclick="openReminderModal()" class="glass chip-btn">⏰ Hatırlatıcı</button>
+    <button onclick="clearChat()" id="clear-btn" class="hidden glass chip-btn chip-danger">Sohbeti Temizle</button>
+  </div>
+  <div class="glass-strong input-bar">
+    <input type="text" id="user-input" onkeydown="if(event.key==='Enter'){ unlockAudioContext(); sendMessage(); }" placeholder="Bir şeyler yaz veya sor...">
+    <button onclick="unlockAudioContext(); toggleVoiceListening();" id="mic-btn" aria-label="Mikrofon" class="action-btn btn-mic">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+    </button>
+    <button onclick="unlockAudioContext(); sendMessage();" aria-label="Gönder" class="action-btn btn-send">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 12h14M12 5l7 7-7 7"></path></svg>
+    </button>
+  </div>
+</footer>
 
-            <div>
-                <label class="form-label" style="color:#34d399;">Gemini / Vertex AI Anahtarı</label>
-                <input type="password" id="setting-api-key" placeholder="AQ.Ab8R... veya AIzaSy... anahtarını gir" class="form-control">
-            </div>
-
-            <div class="glass" style="padding:12px 14px; border-radius:18px; display:flex; flex-direction:column; gap:10px;">
-                <label class="toggle-row">
-                    <span>Yazarken Sesli Cevap Ver</span>
-                    <input type="checkbox" id="setting-typing-speech">
-                </label>
-            </div>
-
-            <button onclick="saveSettings()" class="primary-btn">Ayarları Kaydet</button>
-        </div>
+<!-- Modallar -->
+<div id="title-modal" class="modal-backdrop hidden">
+  <div class="glass-strong modal-card">
+    <h3 style="font-size:16px; font-weight:700;">Sana Nasıl Hitap Edeyim?</h3>
+    <input type="text" id="title-input" placeholder="Örn: Kanka, Patron, Efendim..." class="form-control">
+    <div class="grid-2">
+      <button onclick="closeModal('title-modal')" class="secondary-btn">İptal</button>
+      <button onclick="saveUserTitle()" class="primary-btn" style="padding:12px;">Kaydet</button>
     </div>
+  </div>
+</div>
 
-    <div id="reminder-modal" class="modal-backdrop hidden">
-        <div class="glass-strong modal-card">
-            <div class="flex items-center justify-between">
-                <h3 style="font-size:16px; font-weight:700;">⏰ Hatırlatıcılar</h3>
-                <button onclick="closeModal('reminder-modal')" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
-            </div>
-            <input type="text" id="reminder-text-input" placeholder="Neyi hatırlatayım?" class="form-control">
-            <div class="grid-2">
-                <input type="number" id="reminder-mins-input" min="1" max="1440" value="5" class="form-control">
-                <button onclick="unlockAudioContext(); addNewReminder();" class="primary-btn" style="padding:12px;">+ Ekle (Dk)</button>
-            </div>
-            <div id="reminder-list" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
-        </div>
+<div id="settings-modal" class="modal-backdrop bottom-sheet hidden">
+  <div class="glass-strong modal-card">
+    <div class="flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
+      <h2 style="font-size:16px; font-weight:700;">Komuta Kontrol Merkezi</h2>
+      <button onclick="closeModal('settings-modal')" style="background:none; border:none; color:#a1a1aa; font-weight:600; font-size:14px;">Kapat</button>
     </div>
-
-    <div id="vision-modal" class="modal-backdrop hidden">
-        <div class="glass-strong modal-card">
-            <div class="flex items-center justify-between">
-                <h3 style="font-size:16px; font-weight:700;">Canlı AI Lens</h3>
-                <button onclick="closeVisionModal()" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
-            </div>
-            <div style="width:100%; height:240px; border-radius:20px; overflow:hidden; background:#09090b; border:1px solid rgba(255,255,255,0.12);">
-                <video id="camera-preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
-            </div>
-            <input type="text" id="vision-prompt" placeholder="Bu görüntüyle ilgili ne soruyorsun?" class="form-control">
-            <button onclick="unlockAudioContext(); captureAndAnalyze();" class="primary-btn">📸 Yakala ve Analiz Et</button>
-        </div>
+    <div>
+      <label class="form-label" style="color:#34d399;">Gemini API Anahtarı</label>
+      <input type="password" id="setting-api-key" placeholder="Anahtarını buraya yapıştır" class="form-control">
+      <p style="font-size:11px; color:#71717a; margin-top:6px;">Anahtar sadece bu telefonda saklanır, kodda yer almaz.</p>
     </div>
-
-    <div id="studio-modal" class="modal-backdrop hidden">
-        <div class="glass-strong modal-card">
-            <div class="flex items-center justify-between">
-                <h3 style="font-size:16px; font-weight:700;">AI Görsel Stüdyosu</h3>
-                <button onclick="closeModal('studio-modal')" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
-            </div>
-            <textarea id="image-prompt-input" rows="3" placeholder="Çizmemi istediğin sahneyi yaz..." class="form-control"></textarea>
-            <button onclick="unlockAudioContext(); generateAIImage();" class="primary-btn">✨ Görseli Oluştur</button>
-        </div>
+    <div class="glass" style="padding:12px 14px; border-radius:18px; display:flex; flex-direction:column; gap:10px;">
+      <label class="toggle-row">
+        <span>Yazarken Sesli Cevap Ver</span>
+        <input type="checkbox" id="setting-typing-speech">
+      </label>
     </div>
+    <button onclick="saveSettings()" class="primary-btn">Ayarları Kaydet</button>
+  </div>
+</div>
 
-    <script>
-        const ACTIVE_MODEL = "gemini-1.5-flash";
+<div id="reminder-modal" class="modal-backdrop hidden">
+  <div class="glass-strong modal-card">
+    <div class="flex items-center justify-between">
+      <h3 style="font-size:16px; font-weight:700;">⏰ Hatırlatıcılar</h3>
+      <button onclick="closeModal('reminder-modal')" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
+    </div>
+    <input type="text" id="reminder-text-input" placeholder="Neyi hatırlatayım?" class="form-control">
+    <div class="grid-2">
+      <input type="number" id="reminder-mins-input" min="1" max="1440" value="5" class="form-control">
+      <button onclick="unlockAudioContext(); addNewReminder();" class="primary-btn" style="padding:12px;">+ Ekle (Dk)</button>
+    </div>
+    <div id="reminder-list" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+  </div>
+</div>
 
-        let userTitle = localStorage.getItem('ai_user_title') || "Kanka";
-        let isListening = false;
-        let recognition = null;
-        let waveAnimFrame = null;
-        let reminders = JSON.parse(localStorage.getItem('ai_reminders') || '[]');
+<div id="vision-modal" class="modal-backdrop hidden">
+  <div class="glass-strong modal-card">
+    <div class="flex items-center justify-between">
+      <h3 style="font-size:16px; font-weight:700;">Canlı AI Lens</h3>
+      <button onclick="closeVisionModal()" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
+    </div>
+    <div style="width:100%; height:240px; border-radius:20px; overflow:hidden; background:#09090b; border:1px solid rgba(255,255,255,0.12);">
+      <video id="camera-preview" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
+    </div>
+    <input type="text" id="vision-prompt" placeholder="Bu görüntüyle ilgili ne soruyorsun?" class="form-control">
+    <button onclick="unlockAudioContext(); captureAndAnalyze();" class="primary-btn">📸 Yakala ve Analiz Et</button>
+  </div>
+</div>
 
-        const globalAudioPlayer = new Audio();
-        let audioUnlocked = false;
-        function unlockAudioContext() {
-            if (audioUnlocked) return;
-            globalAudioPlayer.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-            globalAudioPlayer.play().then(() => {
-                globalAudioPlayer.pause();
-                audioUnlocked = true;
-            }).catch(() => {});
-        }
+<div id="studio-modal" class="modal-backdrop hidden">
+  <div class="glass-strong modal-card">
+    <div class="flex items-center justify-between">
+      <h3 style="font-size:16px; font-weight:700;">AI Görsel Stüdyosu</h3>
+      <button onclick="closeModal('studio-modal')" style="background:none; border:none; color:#a1a1aa; font-size:13px;">Kapat</button>
+    </div>
+    <textarea id="image-prompt-input" rows="3" placeholder="Çizmemi istediğin sahneyi yaz..." class="form-control"></textarea>
+    <button onclick="unlockAudioContext(); generateAIImage();" class="primary-btn">✨ Görseli Oluştur</button>
+  </div>
+</div>
 
-        function getActiveApiKey() {
-            return (localStorage.getItem('ai_gemini_key') || '').trim();
-        }
+<script>
+// Model listesi: ilki çalışmazsa (bulunamazsa) sıradakine geçer.
+const MODEL_CHAIN = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-flash-latest"];
+let workingModel = localStorage.getItem('ai_working_model') || null;
 
-        function buildGeminiEndpoint(modelName) {
-            const key = getActiveApiKey();
-            const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(key)}`;
-            if (key.startsWith("AQ.")) {
-                return `https://api.allorigins.win/raw?url=` + encodeURIComponent(targetUrl);
-            }
-            return targetUrl;
-        }
+let userTitle = localStorage.getItem('ai_user_title') || "Kanka";
+let isListening = false;
+let recognition = null;
+let waveAnimFrame = null;
+let reminders = JSON.parse(localStorage.getItem('ai_reminders') || '[]');
+let videoStream = null;
+const globalAudioPlayer = new Audio();
+let audioUnlocked = false;
 
-        function updateConnectionBadge() {
-            const dot = document.getElementById('api-status-dot');
-            dot.className = getActiveApiKey() ? "status-dot dot-green" : "status-dot dot-amber";
-        }
+function unlockAudioContext() {
+  if (audioUnlocked) return;
+  globalAudioPlayer.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+  globalAudioPlayer.play().then(() => {
+    globalAudioPlayer.pause();
+    audioUnlocked = true;
+  }).catch(() => {});
+}
 
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('assistant-title-text').textContent = userTitle;
-            document.querySelectorAll('.dynamic-user-title').forEach(el => {
-                el.textContent = userTitle.toLowerCase();
-            });
+function getActiveApiKey() {
+  return (localStorage.getItem('ai_gemini_key') || '').trim();
+}
 
-            const savedKey = localStorage.getItem('ai_gemini_key');
-            if (savedKey) document.getElementById('setting-api-key').value = savedKey;
+function updateConnectionBadge() {
+  const dot = document.getElementById('api-status-dot');
+  dot.className = getActiveApiKey() ? "status-dot dot-green" : "status-dot dot-amber";
+}
 
-            updateConnectionBadge();
-            restoreSavedChat();
-            renderReminders();
-        });
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('assistant-title-text').textContent = userTitle;
+  document.querySelectorAll('.dynamic-user-title').forEach(el => {
+    el.textContent = userTitle.toLowerCase();
+  });
+  const savedKey = localStorage.getItem('ai_gemini_key');
+  if (savedKey) document.getElementById('setting-api-key').value = savedKey;
+  document.getElementById('setting-typing-speech').checked = localStorage.getItem('ai_typing_speech') === '1';
+  updateConnectionBadge();
+  restoreSavedChat();
+  renderReminders();
+  setInterval(checkReminders, 15000);
+  // İlk açılışta anahtar yoksa ayar kutusunu otomatik aç
+  if (!getActiveApiKey()) {
+    openSettings();
+  }
+});
 
-        function restoreSavedChat() {
-            const saved = JSON.parse(localStorage.getItem('ai_saved_messages') || '[]');
-            saved.forEach(item => renderMessageBubble(item.role, item.text, item.imageUrl));
-        }
+function restoreSavedChat() {
+  const saved = JSON.parse(localStorage.getItem('ai_saved_messages') || '[]');
+  saved.forEach(item => renderMessageBubble(item.role, item.text, item.imageUrl));
+}
 
-        function saveMessageToStorage(role, text, imageUrl = null) {
-            const saved = JSON.parse(localStorage.getItem('ai_saved_messages') || '[]');
-            saved.push({ role, text, imageUrl });
-            if (saved.length > 40) saved.splice(0, saved.length - 40);
-            localStorage.setItem('ai_saved_messages', JSON.stringify(saved));
-        }
+function saveMessageToStorage(role, text, imageUrl = null) {
+  const saved = JSON.parse(localStorage.getItem('ai_saved_messages') || '[]');
+  saved.push({ role, text, imageUrl });
+  if (saved.length > 40) saved.splice(0, saved.length - 40);
+  try {
+    localStorage.setItem('ai_saved_messages', JSON.stringify(saved));
+  } catch (e) {}
+}
 
-        function showToast(msg) {
-            const box = document.getElementById('toast-box');
-            document.getElementById('toast-text').textContent = msg;
-            box.style.opacity = '1';
-            setTimeout(() => { box.style.opacity = '0'; }, 3000);
-        }
+function showToast(msg) {
+  const box = document.getElementById('toast-box');
+  document.getElementById('toast-text').textContent = msg;
+  box.style.opacity = '1';
+  setTimeout(() => { box.style.opacity = '0'; }, 3000);
+}
 
-        function toggleDynamicDrawer() {
-            const pill = document.getElementById('di-pill');
-            const drawer = document.getElementById('di-drawer');
-            const chevron = document.getElementById('di-chevron');
-            const isOpen = !drawer.classList.contains('hidden');
+function toggleDynamicDrawer() {
+  const pill = document.getElementById('di-pill');
+  const drawer = document.getElementById('di-drawer');
+  const chevron = document.getElementById('di-chevron');
+  const isOpen = !drawer.classList.contains('hidden');
+  if (isOpen) {
+    drawer.classList.add('hidden');
+    pill.classList.remove('drawer-open');
+    chevron.style.transform = 'rotate(0deg)';
+  } else {
+    drawer.classList.remove('hidden');
+    pill.classList.add('drawer-open');
+    chevron.style.transform = 'rotate(180deg)';
+  }
+}
 
-            if (isOpen) {
-                drawer.classList.add('hidden');
-                pill.classList.remove('drawer-open');
-                chevron.style.transform = 'rotate(0deg)';
-            } else {
-                drawer.classList.remove('hidden');
-                pill.classList.add('drawer-open');
-                chevron.style.transform = 'rotate(180deg)';
-            }
-        }
+function setAssistantState(state, label = 'Hazır') {
+  const orb = document.getElementById('ai-orb');
+  const pill = document.getElementById('di-pill');
+  const waves = document.getElementById('di-waves');
+  const diText = document.getElementById('di-text');
+  orb.classList.remove('listening', 'thinking', 'speaking');
+  pill.classList.remove('listening', 'thinking', 'speaking');
+  if (state === 'idle') {
+    stopDynamicWaveMeter();
+    pill.classList.remove('expanded');
+    waves.classList.add('hidden');
+    diText.textContent = 'Hazır';
+  } else {
+    orb.classList.add(state);
+    pill.classList.add('expanded', state);
+    waves.classList.remove('hidden');
+    diText.textContent = label;
+    startDynamicWaveMeter(state);
+  }
+}
 
-        function setAssistantState(state, label = 'Hazır') {
-            const orb = document.getElementById('ai-orb');
-            const pill = document.getElementById('di-pill');
-            const waves = document.getElementById('di-waves');
-            const diText = document.getElementById('di-text');
+function startDynamicWaveMeter(mode) {
+  stopDynamicWaveMeter();
+  const bars = document.querySelectorAll('.di-bar');
+  let phase = 0;
+  const speed = mode === 'speaking' ? 0.25 : (mode === 'listening' ? 0.19 : 0.13);
+  const animateWaves = () => {
+    phase += speed;
+    for (let i = 0; i < bars.length; i++) {
+      const wave = Math.sin(phase + i * 1.15) * 0.42 + 0.65;
+      bars[i].style.transform = `scaleY(${Math.max(0.25, wave)})`;
+    }
+    waveAnimFrame = requestAnimationFrame(animateWaves);
+  };
+  animateWaves();
+}
 
-            orb.classList.remove('listening', 'thinking', 'speaking');
-            pill.classList.remove('listening', 'thinking', 'speaking');
+function stopDynamicWaveMeter() {
+  if (waveAnimFrame) {
+    cancelAnimationFrame(waveAnimFrame);
+    waveAnimFrame = null;
+  }
+  document.querySelectorAll('.di-bar').forEach(bar => {
+    bar.style.transform = 'scaleY(0.28)';
+  });
+}
 
-            if (state === 'idle') {
-                stopDynamicWaveMeter();
-                pill.classList.remove('expanded');
-                waves.classList.add('hidden');
-                diText.textContent = 'Hazır';
-            } else {
-                orb.classList.add(state);
-                pill.classList.add('expanded', state);
-                waves.classList.remove('hidden');
-                diText.textContent = label;
-                startDynamicWaveMeter(state);
-            }
-        }
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openSettings() { openModal('settings-modal'); }
+function openStudioModal() { openModal('studio-modal'); }
+function openReminderModal() { renderReminders(); openModal('reminder-modal'); }
 
-        function startDynamicWaveMeter(mode) {
-            stopDynamicWaveMeter();
-            const bars = document.querySelectorAll('.di-bar');
-            let phase = 0;
-            const speed = mode === 'speaking' ? 0.25 : (mode === 'listening' ? 0.19 : 0.13);
+async function openVisionModal() {
+  openModal('vision-modal');
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    document.getElementById('camera-preview').srcObject = videoStream;
+  } catch (e) {
+    showToast("Kamera erişimi sağlanamadı");
+  }
+}
 
-            const animateWaves = () => {
-                phase += speed;
-                for (let i = 0; i < bars.length; i++) {
-                    const wave = Math.sin(phase + i * 1.15) * 0.42 + 0.65;
-                    bars[i].style.transform = `scaleY(${Math.max(0.25, wave)})`;
-                }
-                waveAnimFrame = requestAnimationFrame(animateWaves);
-            };
-            animateWaves();
-        }
+function closeVisionModal() {
+  if (videoStream) {
+    videoStream.getTracks().forEach(t => t.stop());
+    videoStream = null;
+  }
+  closeModal('vision-modal');
+}
 
-        function stopDynamicWaveMeter() {
-            if (waveAnimFrame) {
-                cancelAnimationFrame(waveAnimFrame);
-                waveAnimFrame = null;
-            }
-            document.querySelectorAll('.di-bar').forEach(bar => {
-                bar.style.transform = 'scaleY(0.28)';
-            });
-        }
+function openTitleModal() {
+  document.getElementById('title-input').value = userTitle;
+  openModal('title-modal');
+}
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function openSettings() { openModal('settings-modal'); }
-        function openStudioModal() { openModal('studio-modal'); }
-        function openReminderModal() { renderReminders(); openModal('reminder-modal'); }
+function saveUserTitle() {
+  const val = document.getElementById('title-input').value.trim();
+  if (val) {
+    userTitle = val;
+    localStorage.setItem('ai_user_title', userTitle);
+    document.getElementById('assistant-title-text').textContent = userTitle;
+    document.querySelectorAll('.dynamic-user-title').forEach(el => {
+      el.textContent = userTitle.toLowerCase();
+    });
+    closeModal('title-modal');
+    showToast(`Hitap güncellendi: ${userTitle}`);
+  }
+}
 
-        function openTitleModal() {
-            document.getElementById('title-input').value = userTitle;
-            openModal('title-modal');
-        }
-        function saveUserTitle() {
-            const val = document.getElementById('title-input').value.trim();
-            if (val) {
-                userTitle = val;
-                localStorage.setItem('ai_user_title', userTitle);
-                document.getElementById('assistant-title-text').textContent = userTitle;
-                document.querySelectorAll('.dynamic-user-title').forEach(el => {
-                    el.textContent = userTitle.toLowerCase();
-                });
-                closeModal('title-modal');
-                showToast(`Hitap güncellendi: ${userTitle}`);
-            }
-        }
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[m]));
+}
 
-        function renderMessageBubble(role, text, imageUrl = null) {
-            const container = document.getElementById('chat-container');
-            const orb = document.getElementById('ai-orb');
-            const hint = document.getElementById('orb-hint');
-            const clearBtn = document.getElementById('clear-btn');
+function formatText(str) {
+  return escapeHtml(str)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
 
-            container.classList.remove('hidden');
-            clearBtn.classList.remove('hidden');
-            orb.classList.add('compact');
-            hint.classList.add('hidden');
+function renderMessageBubble(role, text, imageUrl = null) {
+  const container = document.getElementById('chat-container');
+  const orb = document.getElementById('ai-orb');
+  const hint = document.getElementById('orb-hint');
+  const clearBtn = document.getElementById('clear-btn');
+  container.classList.remove('hidden');
+  clearBtn.classList.remove('hidden');
+  orb.classList.add('compact');
+  hint.classList.add('hidden');
+  const wrapper = document.createElement('div');
+  if (role === 'user') {
+    wrapper.className = 'msg-row-user';
+    wrapper.innerHTML = `<div class="msg-bubble-user">${escapeHtml(text)}</div>`;
+  } else {
+    wrapper.className = 'msg-row-ai';
+    const imgHtml = imageUrl ? `<img src="${imageUrl}" alt="Görsel">` : '';
+    wrapper.innerHTML = `<div class="ai-avatar">AI</div><div class="glass msg-bubble-ai">${formatText(text)}${imgHtml}</div>`;
+  }
+  container.appendChild(wrapper);
+  container.scrollTop = container.scrollHeight;
+}
 
-            const wrapper = document.createElement('div');
-            if (role === 'user') {
-                wrapper.className = 'msg-row-user';
-                wrapper.innerHTML = `<div class="msg-bubble-user">${escapeHtml(text)}</div>`;
-            } else {
-                wrapper.className = 'msg-row-ai';
-                const imgHtml = imageUrl ? `<img src="${imageUrl}" alt="Görsel">` : '';
-                wrapper.innerHTML = `
-                    <div class="ai-avatar">AI</div>
-                    <div class="glass msg-bubble-ai">${formatText(text)}${imgHtml}</div>
-                `;
-            }
-            container.appendChild(wrapper);
-            container.scrollTop = container.scrollHeight;
-        }
+function appendMessage(role, text, imageUrl = null) {
+  renderMessageBubble(role, text, imageUrl);
+  saveMessageToStorage(role, text, imageUrl);
+}
 
-        function appendMessage(role, text, imageUrl = null) {
-            renderMessageBubble(role, text, imageUrl);
-            saveMessageToStorage(role, text, imageUrl);
-        }
+function clearChat() {
+  const container = document.getElementById('chat-container');
+  container.innerHTML = '';
+  localStorage.removeItem('ai_saved_messages');
+  container.classList.add('hidden');
+  document.getElementById('clear-btn').classList.add('hidden');
+  document.getElementById('ai-orb').classList.remove('compact');
+  document.getElementById('orb-hint').classList.remove('hidden');
+}
 
-        function clearChat() {
-            const container = document.getElementById('chat-container');
-            container.innerHTML = '';
-            localStorage.removeItem('ai_saved_messages');
-            container.classList.add('hidden');
-            document.getElementById('clear-btn').classList.add('hidden');
-            document.getElementById('ai-orb').classList.remove('compact');
-            document.getElementById('orb-hint').classList.remove('hidden');
-        }
+/* Hatırlatıcılar */
+function addNewReminder(customText = null, customMins = null) {
+  const textEl = document.getElementById('reminder-text-input');
+  const text = customText || textEl.value.trim();
+  let mins = customMins || parseInt(document.getElementById('reminder-mins-input').value, 10);
+  if (!text) return;
+  if (!mins || mins < 1) mins = 5;
+  reminders.push({ id: Date.now(), text, dueTime: Date.now() + mins * 60000 });
+  localStorage.setItem('ai_reminders', JSON.stringify(reminders));
+  textEl.value = '';
+  renderReminders();
+  showToast("Hatırlatıcı eklendi");
+}
 
-        function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-        }
-        function formatText(str) {
-            return escapeHtml(str).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-        }
+function deleteReminder(id) {
+  reminders = reminders.filter(r => r.id !== id);
+  localStorage.setItem('ai_reminders', JSON.stringify(reminders));
+  renderReminders();
+}
 
-        function addNewReminder(customText = null, customMins = null) {
-            const text = customText || document.getElementById('reminder-text-input').value.trim();
-            const mins = customMins || parseInt(document.getElementById('reminder-mins-input').value, 10);
-            if (!text) return;
-            reminders.push({ id: Date.now(), text, dueTime: Date.now() + mins * 60000 });
-            localStorage.setItem('ai_reminders', JSON.stringify(reminders));
-            renderReminders();
-            showToast("Hatırlatıcı eklendi");
-        }
-        function deleteReminder(id) {
-            reminders = reminders.filter(r => r.id !== id);
-            localStorage.setItem('ai_reminders', JSON.stringify(reminders));
-            renderReminders();
-        }
-        function renderReminders() {
-            const list = document.getElementById('reminder-list');
-            if (!list) return;
-            if (reminders.length === 0) {
-                list.innerHTML = `<p style="font-size:12px; color:#71717a; text-align:center;">Aktif hatırlatıcı yok.</p>`;
-                return;
-            }
-            list.innerHTML = reminders.map(r => `
-                <div class="glass" style="padding:10px; border-radius:12px; display:flex; justify-content:space-between; font-size:12px;">
-                    <span>${escapeHtml(r.text)}</span>
-                    <button onclick="deleteReminder(${r.id})" style="color:#fda4af; background:none; border:none; cursor:pointer;">Sil</button>
-                </div>
-            `).join('');
-        }
+function renderReminders() {
+  const list = document.getElementById('reminder-list');
+  if (!list) return;
+  if (reminders.length === 0) {
+    list.innerHTML = `<p style="font-size:12px; color:#71717a; text-align:center;">Aktif hatırlatıcı yok.</p>`;
+    return;
+  }
+  list.innerHTML = reminders.map(r => `
+    <div class="glass" style="padding:10px; border-radius:12px; display:flex; justify-content:space-between; font-size:12px;">
+      <span>${escapeHtml(r.text)}</span>
+      <button onclick="deleteReminder(${r.id})" style="color:#fda4af; background:none; border:none; cursor:pointer;">Sil</button>
+    </div>`).join('');
+}
 
-        async function callGeminiChat(promptText) {
-            const activeKey = getActiveApiKey();
-            if (!activeKey) {
-                setAssistantState('idle');
-                openSettings();
-                return `Önce sağ üstteki ayarlardan API anahtarını kaydetmelisin ${userTitle}.`;
-            }
+// Uygulama açıkken süresi dolan hatırlatıcıları bildirir
+function checkReminders() {
+  const now = Date.now();
+  const due = reminders.filter(r => r.dueTime <= now);
+  if (due.length === 0) return;
+  reminders = reminders.filter(r => r.dueTime > now);
+  localStorage.setItem('ai_reminders', JSON.stringify(reminders));
+  renderReminders();
+  due.forEach(r => {
+    appendMessage('ai', `⏰ Hatırlatma: ${r.text}`);
+    showToast(`⏰ ${r.text}`);
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(`Hatırlatma: ${r.text}`);
+      u.lang = 'tr-TR';
+      window.speechSynthesis.speak(u);
+    }
+  });
+}
 
-            setAssistantState('thinking', 'Düşünüyor...');
-            const url = buildGeminiEndpoint(ACTIVE_MODEL);
-            const payload = {
-                contents: [{ role: "user", parts: [{ text: `Hitap şeklim '${userTitle}'. Cevap verirken samimi ol. Soru: ${promptText}` }] }]
-            };
+/* Gemini API */
+async function callGeminiAPI(payloadObj) {
+  const apiKey = getActiveApiKey();
+  if (!apiKey) {
+    setAssistantState('idle');
+    openSettings();
+    throw new Error(`Lütfen ayarlardan Gemini API anahtarını gir ${userTitle}.`);
+  }
+  const models = workingModel
+    ? [workingModel, ...MODEL_CHAIN.filter(m => m !== workingModel)]
+    : MODEL_CHAIN;
+  let lastError = null;
+  for (const model of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify(payloadObj)
+      });
+    } catch (netErr) {
+      throw new Error("İnternet bağlantısı kurulamadı. Bağlantını kontrol et.");
+    }
+    let data = {};
+    try { data = await response.json(); } catch (e) {}
+    if (response.ok) {
+      if (workingModel !== model) {
+        workingModel = model;
+        localStorage.setItem('ai_working_model', model);
+      }
+      return data;
+    }
+    const msg = (data && data.error && data.error.message) || `HTTP ${response.status}`;
+    lastError = new Error(msg);
+    // Model bulunamadıysa sıradaki modeli dene, diğer hatalarda dur
+    if (response.status === 404 || /not found|not supported|no longer available/i.test(msg)) {
+      continue;
+    }
+    throw lastError;
+  }
+  throw lastError || new Error("Model bulunamadı.");
+}
 
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                    return `API Hatası (${res.status}): ${data?.error?.message || 'Bilinmeyen hata'}`;
-                }
-                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (reply) return reply;
-                return "Boş yanıt alındı.";
-            } catch (e) {
-                return `Bağlantı Hatası: ${e.message}`;
-            }
-        }
+/* Güncel kur / altın verisi (ücretsiz, anahtarsız kaynaklar) */
+const MARKET_REGEX = /dolar|euro|sterlin|d[öo]viz|\bkur\b|alt[ıi]n|gram|[çc]eyrek|yar[ıi]m|cumhuriyet|\bons\b/i;
 
-        async function speakWithGeminiTTS(text, isVoiceInput = false) {
-            globalAudioPlayer.pause();
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            if (!isVoiceInput && !document.getElementById('setting-typing-speech').checked) {
-                setAssistantState('idle');
-                return;
-            }
-            setAssistantState('speaking', 'Konuşuyor...');
-            if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance(text.replace(/[*#_`]/g, '').slice(0, 400));
-                u.lang = 'tr-TR';
-                u.onend = () => setAssistantState('idle');
-                window.speechSynthesis.speak(u);
-            } else {
-                setAssistantState('idle');
-            }
-        }
+async function fetchJsonWithTimeout(url, ms = 7000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
-        async function sendMessage(voicePrompt = null) {
-            const input = document.getElementById('user-input');
-            const text = voicePrompt || input.value.trim();
-            if (!text) return;
-            if (!voicePrompt) input.value = '';
+async function fetchMarketData() {
+  // 1) Türk piyasası kaynağı: döviz + gram/çeyrek/yarım/cumhuriyet altın
+  try {
+    const j = await fetchJsonWithTimeout('https://finans.truncgil.com/v4/today.json');
+    const wanted = /usd|eur|gbp|gram|ceyrek|çeyrek|yarim|yarım|cumhuriyet|tam|ata|ons|altin|altın|gold/i;
+    const slim = {};
+    let count = 0;
+    for (const [key, val] of Object.entries(j)) {
+      if (val && typeof val === 'object' && wanted.test(key) && count < 30) {
+        slim[key] = { Buying: val.Buying, Selling: val.Selling, Change: val.Change };
+        count++;
+      }
+    }
+    if (count > 0) {
+      return { kaynak: 'finans.truncgil.com', guncelleme: j.Update_Date || null, veri: slim };
+    }
+  } catch (e) {}
+  // 2) Yedek: USD/EUR kuru + ons altından hesaplanan yaklaşık gram altın
+  try {
+    const fx = await fetchJsonWithTimeout('https://open.er-api.com/v6/latest/USD');
+    const usdTry = fx?.rates?.TRY;
+    if (!usdTry) throw new Error('kur yok');
+    const out = {
+      USD_TRY: usdTry,
+      EUR_TRY: fx.rates.EUR ? usdTry / fx.rates.EUR : null
+    };
+    try {
+      const g = await fetchJsonWithTimeout('https://api.gold-api.com/price/XAU');
+      if (g?.price) {
+        out.ONS_ALTIN_USD = g.price;
+        out.GRAM_ALTIN_TRY_YAKLASIK = (g.price * usdTry) / 31.1035;
+      }
+    } catch (e) {}
+    return { kaynak: 'open.er-api.com / gold-api.com (yaklaşık)', guncelleme: fx.time_last_update_utc || null, veri: out };
+  } catch (e) {}
+  return null;
+}
 
-            appendMessage('user', text);
-            const reply = await callGeminiChat(text);
-            appendMessage('ai', reply);
-            await speakWithGeminiTTS(reply, Boolean(voicePrompt));
-        }
+async function callGeminiChat(promptText) {
+  setAssistantState('thinking', 'Düşünüyor...');
+  try {
+    let marketNote = '';
+    if (MARKET_REGEX.test(promptText)) {
+      setAssistantState('thinking', 'Piyasa bakılıyor...');
+      const market = await fetchMarketData();
+      if (market) {
+        marketNote = `\n\nCANLI PİYASA VERİSİ (${market.kaynak}, güncelleme: ${market.guncelleme || 'bilinmiyor'}): ${JSON.stringify(market.veri)}\nKur ve altın fiyatı sorularında SADECE bu veriyi kullan, başka sayı uydurma. Satış/alış fiyatını belirt, kaynağı ve güncelleme zamanını kısaca söyle.`;
+      } else {
+        marketNote = `\n\nNOT: Canlı piyasa verisine şu an ulaşılamadı. Kur/altın için sayı uydurma; verinin alınamadığını kısaca söyle.`;
+      }
+    }
+    const data = await callGeminiAPI({
+      contents: [{
+        role: "user",
+        parts: [{ text: `Hitap şeklim '${userTitle}'. Cevap verirken samimi ol. Soru: ${promptText}${marketNote}` }]
+      }]
+    });
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (reply) return reply;
+    return "API'den geçerli yanıt alınamadı.";
+  } catch (e) {
+    return `API Hatası: ${e.message}`;
+  }
+}
 
-        async function toggleVoiceListening() {
-            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRec) {
-                showToast("Tarayıcı ses tanımayı desteklemiyor");
-                return;
-            }
-            if (isListening && recognition) {
-                recognition.stop();
-                isListening = false;
-                setAssistantState('idle');
-                return;
-            }
-            recognition = new SpeechRec();
-            recognition.lang = 'tr-TR';
-            recognition.onstart = () => { isListening = true; setAssistantState('listening', 'Dinliyor...'); };
-            recognition.onresult = (e) => { isListening = false; sendMessage(e.results[0][0].transcript); };
-            recognition.onerror = () => { isListening = false; setAssistantState('idle'); };
-            recognition.start();
-        }
+async function speakWithGeminiTTS(text, isVoiceInput = false) {
+  globalAudioPlayer.pause();
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if (!isVoiceInput && !document.getElementById('setting-typing-speech').checked) {
+    setAssistantState('idle');
+    return;
+  }
+  setAssistantState('speaking', 'Konuşuyor...');
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(text.replace(/[*#_`]/g, '').slice(0, 400));
+    u.lang = 'tr-TR';
+    u.onend = () => setAssistantState('idle');
+    u.onerror = () => setAssistantState('idle');
+    window.speechSynthesis.speak(u);
+  } else {
+    setAssistantState('idle');
+  }
+}
 
-        function saveSettings() {
-            localStorage.setItem('ai_gemini_key', document.getElementById('setting-api-key').value.trim());
-            updateConnectionBadge();
-            closeModal('settings-modal');
-            showToast("Ayarlar kaydedildi");
-        }
-    </script>
+async function sendMessage(voicePrompt = null) {
+  const input = document.getElementById('user-input');
+  const text = voicePrompt || input.value.trim();
+  if (!text) return;
+  if (!voicePrompt) input.value = '';
+  appendMessage('user', text);
+  const reply = await callGeminiChat(text);
+  appendMessage('ai', reply);
+  await speakWithGeminiTTS(reply, Boolean(voicePrompt));
+}
+
+async function toggleVoiceListening() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    showToast("Tarayıcı ses tanımayı desteklemiyor");
+    return;
+  }
+  if (isListening && recognition) {
+    recognition.stop();
+    isListening = false;
+    setAssistantState('idle');
+    return;
+  }
+  recognition = new SpeechRec();
+  recognition.lang = 'tr-TR';
+  recognition.onstart = () => { isListening = true; setAssistantState('listening', 'Dinliyor...'); };
+  recognition.onresult = (e) => { isListening = false; sendMessage(e.results[0][0].transcript); };
+  recognition.onerror = () => { isListening = false; setAssistantState('idle'); };
+  recognition.onend = () => { if (isListening) { isListening = false; setAssistantState('idle'); } };
+  recognition.start();
+}
+
+async function captureAndAnalyze() {
+  const video = document.getElementById('camera-preview');
+  const promptText = document.getElementById('vision-prompt').value.trim() || "Bu görseli analiz et.";
+  if (!video.videoWidth) {
+    showToast("Kamera görüntüsü henüz hazır değil");
+    return;
+  }
+  // Kareyi kamera kapanmadan ÖNCE yakala
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  const base64Data = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+  document.getElementById('vision-prompt').value = '';
+  closeVisionModal();
+
+  appendMessage('user', `[Kamera Görseli] ${promptText}`);
+  setAssistantState('thinking', 'Analiz Ediliyor...');
+  try {
+    const data = await callGeminiAPI({
+      contents: [{
+        role: "user",
+        parts: [
+          { text: promptText },
+          { inline_data: { mime_type: "image/jpeg", data: base64Data } }
+        ]
+      }]
+    });
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Görsel analiz edilemedi.";
+    appendMessage('ai', reply);
+    await speakWithGeminiTTS(reply, true);
+  } catch (e) {
+    appendMessage('ai', `Vision API Hatası: ${e.message}`);
+    setAssistantState('idle');
+  }
+}
+
+async function generateAIImage() {
+  const prompt = document.getElementById('image-prompt-input').value.trim();
+  if (!prompt) return;
+  closeModal('studio-modal');
+  appendMessage('user', `Görsel Oluştur: ${prompt}`);
+  setAssistantState('thinking', 'Çiziliyor...');
+  try {
+    const data = await callGeminiAPI({
+      contents: [{
+        role: "user",
+        parts: [{ text: `Sen bir görsel prompt mühendisisin. Şu sahne için detaylı bir tasvir yap: ${prompt}` }]
+      }]
+    });
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Görsel tasviri oluşturuldu.";
+    appendMessage('ai', reply);
+    setAssistantState('idle');
+  } catch (e) {
+    appendMessage('ai', `Görsel Hatası: ${e.message}`);
+    setAssistantState('idle');
+  }
+}
+
+function saveSettings() {
+  const keyVal = document.getElementById('setting-api-key').value.trim();
+  localStorage.setItem('ai_gemini_key', keyVal);
+  localStorage.setItem('ai_typing_speech', document.getElementById('setting-typing-speech').checked ? '1' : '0');
+  updateConnectionBadge();
+  closeModal('settings-modal');
+  showToast("Ayarlar kaydedildi");
+}
+</script>
 </body>
 </html>
