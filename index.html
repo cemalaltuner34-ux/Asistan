@@ -551,6 +551,31 @@ footer {
   50% { border-radius: 58% 42% 38% 62% / 55% 60% 40% 45%; transform: scale(1.06); }
   100% { border-radius: 46% 54% 52% 48% / 40% 48% 52% 60%; transform: scale(0.98); }
 }
+/* Ana ekran (uygulama) modunda çentik gerçek Dinamik Ada ile birleşir */
+body.standalone .di-anchor { top: 11px; }
+body.standalone #di-pill {
+  min-height: 37px;
+  min-width: 126px;
+  padding: 0 14px;
+  border-radius: 22px;
+}
+body.standalone #di-pill.expanded,
+body.standalone #di-pill.drawer-open {
+  padding: 38px 16px 8px;
+  min-height: 0;
+  min-width: 256px;
+  border-radius: 28px;
+}
+body.standalone #di-pill.drawer-open { min-width: 316px; }
+body.standalone #di-pill.expanded .di-top-row { height: 36px; }
+body.standalone #di-pill:not(.expanded):not(.drawer-open) .di-top-row { height: 37px; }
+body.standalone #di-pill:not(.expanded):not(.drawer-open) .di-top-row > * {
+  opacity: 0;
+  pointer-events: none;
+}
+body.standalone header {
+  padding-top: calc(max(env(safe-area-inset-top), 12px) + 14px);
+}
 </style>
 </head>
 <body>
@@ -561,7 +586,7 @@ footer {
 <!-- Dinamik Ada -->
 <div class="di-anchor">
   <div id="di-pill">
-    <div class="di-top-row" onclick="unlockAudioContext(); toggleVoiceListening();">
+    <div class="di-top-row" onclick="onIslandTap();">
       <div id="di-waves" class="di-waves hidden">
         <span class="di-bar"></span>
         <span class="di-bar"></span>
@@ -754,6 +779,9 @@ function updateConnectionBadge() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+    document.body.classList.add('standalone');
+  }
   document.getElementById('assistant-title-text').textContent = userTitle;
   document.querySelectorAll('.dynamic-user-title').forEach(el => {
     el.textContent = userTitle.toLowerCase();
@@ -790,6 +818,18 @@ function showToast(msg) {
   document.getElementById('toast-text').textContent = msg;
   box.style.opacity = '1';
   setTimeout(() => { box.style.opacity = '0'; }, 3000);
+}
+
+// Ada'ya dokunma: ana ekran modunda boşta ise menüyü aç/kapat, aksi halde sesi başlat/durdur
+function onIslandTap() {
+  unlockAudioContext();
+  const standalone = document.body.classList.contains('standalone');
+  const pill = document.getElementById('di-pill');
+  if (standalone && !pill.classList.contains('expanded')) {
+    toggleDynamicDrawer();
+  } else {
+    toggleVoiceListening();
+  }
 }
 
 function toggleDynamicDrawer() {
@@ -1043,10 +1083,15 @@ async function callGeminiAPI(payloadObj) {
     const msg = (data && data.error && data.error.message) || `HTTP ${response.status}`;
     lastError = new Error(msg);
     // Model bulunamadıysa sıradaki modeli dene, diğer hatalarda dur
-    if (response.status === 404 || /not found|not supported|no longer available/i.test(msg)) {
+    const retryable = [404, 429, 500, 502, 503, 504].includes(response.status) ||
+      /not found|not supported|no longer available|high demand|overloaded|unavailable|quota/i.test(msg);
+    if (retryable) {
       continue;
     }
     throw lastError;
+  }
+  if (lastError && /high demand|overloaded|unavailable|quota|HTTP 429|HTTP 503/i.test(lastError.message)) {
+    throw new Error("Gemini şu an yoğun, birkaç saniye sonra tekrar dene.");
   }
   throw lastError || new Error("Model bulunamadı.");
 }
