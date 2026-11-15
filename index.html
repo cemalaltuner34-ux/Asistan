@@ -61,10 +61,10 @@
             border: 1px solid rgba(255, 255, 255, 0.13);
         }
 
-        /* Gerçek Çentik Hizalı & İçi Saf Siyah (#000000) Dinamik Ada */
+        /* Dinamik Ada */
         .di-anchor {
             position: fixed;
-            top: max(env(safe-area-inset-top), 10px);
+            top: calc(max(env(safe-area-inset-top), 12px) + 6px);
             left: 50%;
             transform: translateX(-50%);
             z-index: 45;
@@ -198,7 +198,7 @@
 
         /* Üst Kontroller */
         header {
-            padding-top: calc(max(env(safe-area-inset-top), 10px) + 52px);
+            padding-top: calc(max(env(safe-area-inset-top), 12px) + 56px);
             padding-left: 16px;
             padding-right: 16px;
             display: flex;
@@ -264,8 +264,8 @@
             cursor: pointer;
         }
         .orb-wrapper.compact {
-            width: 100px;
-            height: 100px;
+            width: 96px;
+            height: 96px;
         }
         .orb-halo {
             position: absolute;
@@ -585,7 +585,7 @@
         /* Toast */
         #toast-box {
             position: fixed;
-            top: calc(max(env(safe-area-inset-top), 10px) + 56px);
+            top: calc(max(env(safe-area-inset-top), 12px) + 56px);
             left: 50%;
             transform: translateX(-50%);
             z-index: 60;
@@ -636,7 +636,7 @@
         <div id="toast-text" class="glass-strong"></div>
     </div>
 
-    <!-- Gerçek Çentik Hizalı & İçi Saf Siyah Dinamik Ada -->
+    <!-- Dinamik Ada -->
     <div class="di-anchor">
         <div id="di-pill">
             <div class="di-top-row" onclick="unlockAudioContext(); toggleVoiceListening();">
@@ -753,9 +753,9 @@
             </div>
 
             <div>
-                <label class="form-label" style="color:#34d399;">Gemini API Anahtarı</label>
-                <input type="password" id="setting-api-key" placeholder="AIzaSy... (Google AI Studio anahtarını gir)" class="form-control">
-                <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Yalnızca senin iPhone hafızanda güvenle saklanır.</p>
+                <label class="form-label" style="color:#34d399;">Gemini / Vertex AI Anahtarı</label>
+                <input type="password" id="setting-api-key" placeholder="AIzaSy... veya AQ.Ab8R... anahtarını gir" class="form-control">
+                <p style="font-size:11px; color:#a1a1aa; margin-top:4px;">Hem Google AI Studio hem Vertex AI Express anahtarlarını otomatik tanır.</p>
             </div>
 
             <div class="grid-2">
@@ -881,6 +881,7 @@
     </div>
 
     <script>
+        const GEMINI_TEXT_MODEL = "gemini-3.8-flash";
         let userTitle = localStorage.getItem('ai_user_title') || "Kanka";
         let isListening = false;
         let recognition = null;
@@ -888,7 +889,6 @@
         let waveAnimFrame = null;
         let reminders = JSON.parse(localStorage.getItem('ai_reminders') || '[]');
 
-        // iOS Safari Ses Kilidi Açıcı Tekil Audio Nesnesi
         const globalAudioPlayer = new Audio();
         let audioUnlocked = false;
         function unlockAudioContext() {
@@ -900,7 +900,6 @@
             }).catch(() => {});
         }
 
-        // Gerçek Kişilik Modu Karakter Tarifleri
         const PERSONA_PROMPTS = {
             samimi: "Sen kullanıcının en yakın, sadık ve samimi dostusun. Doğal, sıcak, içten ve destekleyici bir dille konuşursun.",
             jarvis: "Sen Tony Stark'ın J.A.R.V.I.S. yapay zekası gibi son derece kibar, analitik, soğukkanlı, yüksek teknolojili ve kusursuz hizmet veren bir sistem asistanısın.",
@@ -912,6 +911,15 @@
 
         function getActiveApiKey() {
             return (localStorage.getItem('ai_gemini_key') || '').trim();
+        }
+
+        function buildGeminiEndpoint(modelName, action = "generateContent") {
+            const key = getActiveApiKey();
+            // Vertex AI Express anahtarı (AQ. ile başlar) vs Google AI Studio anahtarı (AIza ile başlar)
+            if (key.startsWith("AQ.")) {
+                return `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:${action}?key=${encodeURIComponent(key)}`;
+            }
+            return `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:${action}?key=${encodeURIComponent(key)}`;
         }
 
         function updateConnectionBadge() {
@@ -1221,7 +1229,7 @@
             if (!activeKey) {
                 setAssistantState('idle');
                 openSettings();
-                return `Önce sağ üstteki Komuta Kontrol Merkezi'nden Gemini API anahtarını girip kaydetmelisin ${userTitle}.`;
+                return `Önce sağ üstteki Komuta Kontrol Merkezi'nden API anahtarını girip kaydetmelisin ${userTitle}.`;
             }
 
             setAssistantState('thinking', 'Düşünüyor...');
@@ -1242,31 +1250,35 @@
 
             const payload = {
                 contents: chatHistory,
-                tools: [{ google_search: {} }],
                 systemInstruction: { parts: [{ text: sysInstruction }] }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`;
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                    const errDetail = data?.error?.message || `HTTP ${res.status}`;
-                    return `API Hatası (${res.status}): ${errDetail}`;
+            const candidateModels = [GEMINI_TEXT_MODEL, "gemini-2.5-flash", "gemini-2.0-flash"];
+            let lastError = "";
+
+            for (const modelName of candidateModels) {
+                const url = buildGeminiEndpoint(modelName, "generateContent");
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        lastError = data?.error?.message || `HTTP ${res.status}`;
+                        continue;
+                    }
+                    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (reply) {
+                        chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                        return reply;
+                    }
+                } catch (e) {
+                    lastError = e.message;
                 }
-                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (reply) {
-                    chatHistory.push({ role: "model", parts: [{ text: reply }] });
-                    return reply;
-                }
-                return `Model boş yanıt döndürdü ${userTitle}.`;
-            } catch (e) {
-                return `Ağ Bağlantı Hatası: ${e.message}`;
             }
+            return `API Hatası: ${lastError}`;
         }
 
         async function speakWithGeminiTTS(text, isVoiceInput = false) {
@@ -1284,7 +1296,7 @@
             const cleanText = text.replace(/[*#_`]/g, '').slice(0, 450);
             const activeKey = getActiveApiKey();
 
-            if (activeKey) {
+            if (activeKey && !activeKey.startsWith("AQ.")) {
                 const payload = {
                     contents: [{ parts: [{ text: cleanText }] }],
                     generationConfig: {
@@ -1297,7 +1309,7 @@
                     }
                 };
 
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${activeKey}`;
+                const url = buildGeminiEndpoint("gemini-2.5-flash-preview-tts", "generateContent");
                 try {
                     const res = await fetch(url, {
                         method: 'POST',
@@ -1377,7 +1389,7 @@
             await speakWithGeminiTTS(reply, Boolean(voicePrompt));
         }
 
-        function toggleVoiceListening() {
+        async function toggleVoiceListening() {
             if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
                 DeviceMotionEvent.requestPermission().catch(() => {});
             }
@@ -1394,8 +1406,19 @@
                 return;
             }
 
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop());
+                } catch (permErr) {
+                    showToast("Lütfen Ayarlar > Safari > Mikrofon iznini aç");
+                    return;
+                }
+            }
+
             recognition = new SpeechRec();
             recognition.lang = 'tr-TR';
+            recognition.continuous = false;
             recognition.interimResults = false;
 
             recognition.onstart = () => {
@@ -1410,7 +1433,11 @@
             recognition.onerror = (e) => {
                 isListening = false;
                 setAssistantState('idle');
-                if (e.error !== 'no-speech') showToast(`Mikrofon Hatası: ${e.error}`);
+                if (e.error === 'not-allowed') {
+                    showToast("Mikrofon izni kapalı, iPhone ayarlarından izin ver");
+                } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
+                    showToast(`Ses Algılama Durdu (${e.error}), tekrar dokun`);
+                }
             };
             recognition.onend = () => {
                 if (isListening) {
@@ -1418,7 +1445,12 @@
                     setAssistantState('idle');
                 }
             };
-            recognition.start();
+            try {
+                recognition.start();
+            } catch (startErr) {
+                isListening = false;
+                setAssistantState('idle');
+            }
         }
 
         async function generateAIImage() {
@@ -1436,7 +1468,7 @@
             appendMessage('user', `✨ Görsel: ${prompt}`);
             setAssistantState('thinking', 'Görsel çiziliyor...');
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${activeKey}`;
+            const url = buildGeminiEndpoint("imagen-3.0-generate-002", "predict");
             try {
                 const res = await fetch(url, {
                     method: 'POST',
@@ -1517,7 +1549,7 @@
             setAssistantState('thinking', 'Arayüz kodlanıyor...');
 
             const cssPrompt = `Sen bir kıdemli iOS UI/CSS mühendisisin. Kullanıcının şu arayüz değişikliği isteğini sadece geçerli ham CSS kodu olarak yaz (markdown bloğu veya açıklama ekleme, sadece CSS kuralları döndür, gerekirse !important kullan): "${cmd}". Mevcut sınıflar: body, .orb-core, .orb-halo, .glass, .glass-strong, #di-pill.`;
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`;
+            const url = buildGeminiEndpoint(GEMINI_TEXT_MODEL, "generateContent");
 
             try {
                 const res = await fetch(url, {
